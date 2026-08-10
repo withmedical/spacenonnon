@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>스페이스농농 & 제주 맛집 지도 🍊</title>
 
-  <!-- 카카오 지도 및 공유 SDK (발급받으신 JavaScript 키 적용 완료) -->
+  <!-- 카카오 지도 및 공유 SDK (integrity 에러 원인 제거 및 키 연동 완료) -->
   <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db0a63b0d60c1034b115d0a27fcbc5cc&libraries=services"></script>
-  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" integrity="sha384-l+xbElFSnPZ2rOaBU37xI296vLsRDFVOEL4e37SO8iKE2yrW1mGPj5w50d2/U8k5" crossorigin="anonymous"></script>
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js"></script>
 
   <style>
     /* 기본 스타일 초기화 */
@@ -499,7 +499,6 @@
     let isAdmin = false;
 
     // 🏡 영구 기본 펜션 정보 데이터 ('스페이스농농')
-    // 💡 아래 url 및 문구를 사장님 펜션의 실제 사진 URL과 정보로 수정하시면 영구 유지됩니다.
     const DEFAULT_PENSION = {
       name: "🏡 스페이스농농",
       sub: "제주 바다와 노을을 한눈에 담을 수 있는 감성 숙소입니다.",
