@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>스페이스농농 & 제주 맛집 지도 🍊</title>
 
-  <!-- 카카오 지도 및 공유 SDK -->
-  <!-- ⚠️ 아래 YOUR_APP_KEY 위치에 Kakao Developers에서 발급받은 JavaScript 키를 넣어주세요 -->
-  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db0a63b0d60c1034b115d0a27fcbc5cc"></script>
+  <!-- 카카오 지도 및 공유 SDK (발급받으신 JavaScript 키 적용 완료) -->
+  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db0a63b0d60c1034b115d0a27fcbc5cc&libraries=services"></script>
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" integrity="sha384-l+xbElFSnPZ2rOaBU37xI296vLsRDFVOEL4e37SO8iKE2yrW1mGPj5w50d2/U8k5" crossorigin="anonymous"></script>
 
   <style>
@@ -27,7 +26,7 @@
 
     /* 히어로 섹션 */
     .hero { 
-      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://order-withmedical.com/data/skin/front/udweb/img/technology/tech%20bnr01.jpg') center/cover; 
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80') center/cover; 
       color: #fff; text-align: center; padding: 4rem 1rem; transition: background 0.3s ease;
     }
     .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
@@ -237,7 +236,7 @@
 
       <div class="map-section">
         <div id="map" class="map-placeholder">
-          카카오 지도 API를 로딩 중입니다... (JavaScript 키를 설정해 주세요)
+          카카오 지도 API를 로딩 중입니다...
         </div>
       </div>
     </section>
@@ -481,9 +480,9 @@
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
-    // 카카오 SDK 초기화
+    // 카카오 SDK 초기화 (발급받으신 JavaScript 키 적용)
     if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
-      Kakao.init('YOUR_APP_KEY');
+      Kakao.init('db0a63b0d60c1034b115d0a27fcbc5cc');
     }
 
     // LOCAL STORAGE KEYS
@@ -509,7 +508,7 @@
       address: "제주특별자치도 제주시 애월읍 애월해안로 123",
       tel: "010-XXXX-XXXX",
       allowShare: true,
-      heroBg: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80", // 상단 배너 배경 이미지 URL
+      heroBg: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80",
       heroTitle: "제주 바다 앞 숙소 & 사장님 추천 맛집",
       heroSub: "스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.",
       gallery: [
