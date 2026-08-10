@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>스페이스농농 & 제주 맛집 지도 🍊</title>
 
-  <!-- 카카오 지도 및 공유 SDK (integrity 에러 원인 제거 및 키 연동 완료) -->
+  <!-- 카카오 지도 및 공유 SDK -->
   <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db0a63b0d60c1034b115d0a27fcbc5cc&libraries=services"></script>
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js"></script>
 
@@ -138,12 +138,16 @@
     .btn-submit { padding: 0.7rem 1.2rem; background: #ff6b35; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-submit:hover { background: #e55a2b; }
 
-    /* 동적 사진 입력 항목 아이템 스타일 */
+    /* 동적 아이템 스타일 */
     .form-sub-header { display: flex; justify-content: space-between; align-items: center; margin: 1.2rem 0 0.6rem 0; border-top: 1px dashed #eee; padding-top: 0.8rem; }
     .form-sub-title { font-size: 0.95rem; font-weight: bold; color: #ff6b35; }
     .remove-img-item-btn { background: none; border: none; color: #ff4d4f; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
     .add-img-field-btn { width: 100%; background: #f0f0f0; border: 1px dashed #bbb; color: #444; padding: 0.6rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
     .add-img-field-btn:hover { background: #e5e5e5; }
+
+    /* 카테고리 수정용 리스트 스타일 */
+    .category-edit-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+    .category-edit-row input { flex: 1; }
 
     /* 관리자 체크박스 설정 스타일 */
     .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: bold; color: #222; }
@@ -225,14 +229,8 @@
     <section id="mapSection">
       <h2 class="section-title">제주 맛집 지도 탐색</h2>
 
-      <div class="categories">
-        <button class="category-btn active" data-category="ALL" onclick="filterCategory(this, 'ALL')">전체</button>
-        <button class="category-btn" data-category="흑돼지" onclick="filterCategory(this, '흑돼지')">🐷 흑돼지</button>
-        <button class="category-btn" data-category="해산물/회" onclick="filterCategory(this, '해산물/회')">🐟 해산물/회</button>
-        <button class="category-btn" data-category="카페/디저트" onclick="filterCategory(this, '카페/디저트')">☕ 카페/디저트</button>
-        <button class="category-btn" data-category="국수/고기국수" onclick="filterCategory(this, '국수/고기국수')">🍜 국수/고기국수</button>
-        <button class="category-btn" data-category="도민맛집" onclick="filterCategory(this, '도민맛집')">👍 도민맛집</button>
-      </div>
+      <!-- 동적 카테고리 퀵 메뉴 영역 -->
+      <div class="categories" id="categoryContainer"></div>
 
       <div class="map-section">
         <div id="map" class="map-placeholder">
@@ -283,7 +281,7 @@
   <div id="pensionEditModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>⚙️ 펜션 정보/사진 및 기능 설정</h2>
+        <h2>⚙️ 펜션 정보/사진 및 카테고리 설정</h2>
         <button class="close-btn" onclick="closePensionEditModal()">&times;</button>
       </div>
       <form onsubmit="handlePensionEditSubmit(event)">
@@ -315,6 +313,13 @@
             방문자 맛집 공유 기능 허용 ('나도 맛집 공유하기' 버튼 노출)
           </label>
         </div>
+
+        <!-- 🏷️ 카테고리 관리 영역 추가 -->
+        <div class="form-sub-header">
+          <div class="form-sub-title">🏷️ 맛집 카테고리 관리</div>
+        </div>
+        <div id="editCategoryContainer"></div>
+        <button type="button" class="add-img-field-btn" onclick="addCategoryEditRow()">+ 카테고리 추가하기</button>
 
         <div class="form-sub-header">
           <div class="form-sub-title">🏡 펜션 기본 정보</div>
@@ -372,15 +377,7 @@
         </div>
         <div class="form-group">
           <label for="modalCategory">카테고리 <span class="required">*</span></label>
-          <select id="modalCategory" required>
-            <option value="" disabled selected>카테고리를 선택하세요</option>
-            <option value="흑돼지">🐷 흑돼지</option>
-            <option value="해산물/회">🐟 해산물/회</option>
-            <option value="카페/디저트">☕ 카페/디저트</option>
-            <option value="국수/고기국수">🍜 국수/고기국수</option>
-            <option value="도민맛집">👍 도민맛집</option>
-            <option value="기타">✨ 기타</option>
-          </select>
+          <select id="modalCategory" required></select>
         </div>
         <div class="form-group">
           <label for="modalAddress">주소 <span class="required">*</span></label>
@@ -480,7 +477,7 @@
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
-    // 카카오 SDK 초기화 (발급받으신 JavaScript 키 적용)
+    // 카카오 SDK 초기화
     if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
       Kakao.init('db0a63b0d60c1034b115d0a27fcbc5cc');
     }
@@ -498,7 +495,16 @@
 
     let isAdmin = false;
 
-    // 🏡 영구 기본 펜션 정보 데이터 ('스페이스농농')
+    // 기본 카테고리 목록
+    const DEFAULT_CATEGORIES = [
+      { name: '흑돼지', icon: '🐷' },
+      { name: '해산물/회', icon: '🐟' },
+      { name: '카페/디저트', icon: '☕' },
+      { name: '국수/고기국수', icon: '🍜' },
+      { name: '도민맛집', icon: '👍' }
+    ];
+
+    // 🏡 영구 기본 펜션 정보 데이터
     const DEFAULT_PENSION = {
       name: "🏡 스페이스농농",
       sub: "제주 바다와 노을을 한눈에 담을 수 있는 감성 숙소입니다.",
@@ -510,6 +516,7 @@
       heroBg: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80",
       heroTitle: "제주 바다 앞 숙소 & 사장님 추천 맛집",
       heroSub: "스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.",
+      categories: DEFAULT_CATEGORIES,
       gallery: [
         { url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80", cap: "넓은 잔디밭과 오션뷰 전경" },
         { url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=500&q=80", cap: "아늑한 101호 객실" },
@@ -575,7 +582,7 @@
         updateAdminUI();
         renderFilteredView();
         closeAdminLoginModal();
-        alert('관리자로 인증되었습니다. (정보/사진/배너설정/삭제 권한 부여)');
+        alert('관리자로 인증되었습니다. (정보/사진/배너/카테고리/삭제 권한 부여)');
       } else {
         alert('비밀번호가 올바르지 않습니다.');
       }
@@ -599,10 +606,12 @@
       }
     }
 
-    /* --- PENSION INFO & DYNAMIC GALLERY MANAGEMENT --- */
+    /* --- PENSION INFO & DYNAMIC GALLERY & CATEGORY MANAGEMENT --- */
     function getPensionInfo() {
       const saved = localStorage.getItem(PENSION_INFO_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_PENSION;
+      const data = saved ? JSON.parse(saved) : DEFAULT_PENSION;
+      if (!data.categories) data.categories = DEFAULT_CATEGORIES;
+      return data;
     }
 
     function renderPensionInfo() {
@@ -632,6 +641,12 @@
         }
       });
 
+      // 렌더링: 메인 페이지 카테고리 버튼
+      renderCategoriesUI(info.categories);
+
+      // 렌더링: 맛집 등록 모달 내 카테고리 Select 옵션
+      renderModalCategoryOptions(info.categories);
+
       // 갤러리 영역 동적 생성
       const galleryContainer = document.getElementById('pensionGallery');
       galleryContainer.innerHTML = '';
@@ -648,6 +663,48 @@
       });
     }
 
+    // 메인 카테고리 퀵 메뉴 렌더링
+    function renderCategoriesUI(catList) {
+      const container = document.getElementById('categoryContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // 전체 버튼
+      const allBtn = document.createElement('button');
+      allBtn.className = `category-btn ${currentCategory === 'ALL' ? 'active' : ''}`;
+      allBtn.setAttribute('data-category', 'ALL');
+      allBtn.onclick = function() { filterCategory(this, 'ALL'); };
+      allBtn.innerText = '전체';
+      container.appendChild(allBtn);
+
+      catList.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${currentCategory === cat.name ? 'active' : ''}`;
+        btn.setAttribute('data-category', cat.name);
+        btn.onclick = function() { filterCategory(this, cat.name); };
+        btn.innerText = `${cat.icon || ''} ${cat.name}`.trim();
+        container.appendChild(btn);
+      });
+    }
+
+    // 맛집 등록 모달 dropdown 옵션 렌더링
+    function renderModalCategoryOptions(catList) {
+      const select = document.getElementById('modalCategory');
+      if (!select) return;
+      select.innerHTML = '<option value="" disabled selected>카테고리를 선택하세요</option>';
+      catList.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.name;
+        opt.innerText = `${cat.icon || ''} ${cat.name}`.trim();
+        select.appendChild(opt);
+      });
+      const optEtc = document.createElement('option');
+      optEtc.value = '기타';
+      optEtc.innerText = '✨ 기타';
+      select.appendChild(optEtc);
+    }
+
+    // 관리자 모달 내 카테고리 관리 필드 제어
     function openPensionEditModal() {
       if (!isAdmin) return;
       const info = getPensionInfo();
@@ -657,14 +714,21 @@
       document.getElementById('editPensionTel').value = info.tel || '';
       document.getElementById('editAllowShare').checked = info.allowShare !== false;
 
-      // 메인 배너 설정값 채우기
       document.getElementById('editHeroBg').value = info.heroBg || '';
       document.getElementById('editHeroTitle').value = info.heroTitle || '';
       document.getElementById('editHeroSub').value = info.heroSub || '';
 
+      // 카테고리 관리 필드 구성
+      const editCategoryContainer = document.getElementById('editCategoryContainer');
+      editCategoryContainer.innerHTML = '';
+      const catList = info.categories || DEFAULT_CATEGORIES;
+      catList.forEach(cat => {
+        addCategoryEditRow(cat.icon, cat.name);
+      });
+
+      // 갤러리 관리 필드 구성
       const editGalleryContainer = document.getElementById('editGalleryContainer');
       editGalleryContainer.innerHTML = '';
-
       const galleryList = info.gallery || [];
       galleryList.forEach((item) => {
         addGalleryImageField(item.url, item.cap);
@@ -672,6 +736,23 @@
 
       document.getElementById('editAdminPassword').value = '';
       document.getElementById('pensionEditModal').style.display = 'flex';
+    }
+
+    function addCategoryEditRow(icon = '', name = '') {
+      const container = document.getElementById('editCategoryContainer');
+      const row = document.createElement('div');
+      row.className = 'category-edit-row';
+      row.innerHTML = `
+        <input type="text" class="input-cat-icon" value="${icon}" placeholder="아이콘(예: 🐷)" style="width: 70px;">
+        <input type="text" class="input-cat-name" value="${name}" placeholder="카테고리명(예: 흑돼지)" required>
+        <button type="button" class="remove-img-item-btn" onclick="removeCategoryEditRow(this)">&times;</button>
+      `;
+      container.appendChild(row);
+    }
+
+    function removeCategoryEditRow(btn) {
+      const row = btn.closest('.category-edit-row');
+      if (row) row.remove();
     }
 
     function addGalleryImageField(url = '', cap = '') {
@@ -710,6 +791,20 @@
       e.preventDefault();
       const currentInfo = getPensionInfo();
 
+      // 카테고리 데이터 수집
+      const iconInputs = document.querySelectorAll('.input-cat-icon');
+      const nameInputs = document.querySelectorAll('.input-cat-name');
+      const newCategories = [];
+
+      nameInputs.forEach((nameInput, idx) => {
+        const nameVal = nameInput.value.trim();
+        const iconVal = iconInputs[idx] ? iconInputs[idx].value.trim() : '';
+        if (nameVal) {
+          newCategories.push({ icon: iconVal, name: nameVal });
+        }
+      });
+
+      // 갤러리 데이터 수집
       const urlInputs = document.querySelectorAll('.input-gallery-url');
       const capInputs = document.querySelectorAll('.input-gallery-cap');
       const newGallery = [];
@@ -732,6 +827,7 @@
         heroBg: document.getElementById('editHeroBg').value,
         heroTitle: document.getElementById('editHeroTitle').value,
         heroSub: document.getElementById('editHeroSub').value,
+        categories: newCategories,
         gallery: newGallery
       };
 
@@ -744,8 +840,9 @@
 
       localStorage.setItem(PENSION_INFO_KEY, JSON.stringify(updated));
       renderPensionInfo();
+      renderFilteredView();
       closePensionEditModal();
-      alert('펜션 정보 및 배너 설정이 저장되었습니다.' + passMsg);
+      alert('펜션 정보 및 카테고리 설정이 저장되었습니다.' + passMsg);
     }
 
     /* --- RESTAURANT & MAP HELPERS --- */
