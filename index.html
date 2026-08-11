@@ -87,15 +87,14 @@
     .map-section { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2.5rem; }
     .map-placeholder { width: 100%; height: 400px; background: #e5e3df; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666; font-weight: bold; }
 
-    /* 맛집 카드 리스트 Grid */
+    /* 맛집 카드 리스트 Grid (사진 제거에 맞춘 깔끔한 디자인) */
     .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-    .card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s; }
-    .card:hover { transform: translateY(-4px); }
-    .card-img { width: 100%; height: 180px; background-color: #ccc; object-fit: cover; }
-    .card-body { padding: 1rem; }
-    .card-tag { display: inline-block; background: #fff0e6; color: #ff6b35; font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold; margin-bottom: 0.5rem; }
-    .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.3rem; }
-    .card-desc { font-size: 0.9rem; color: #666; margin-bottom: 1rem; }
+    .card { background: #fff; border-radius: 10px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, border-color 0.2s; }
+    .card:hover { transform: translateY(-4px); border-color: #ffd8cc; }
+    .card-body { padding: 1.2rem; }
+    .card-tag { display: inline-block; background: #fff0e6; color: #ff6b35; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; margin-bottom: 0.6rem; }
+    .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.4rem; color: #222; }
+    .card-desc { font-size: 0.9rem; color: #555; margin-bottom: 1rem; line-height: 1.5; }
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 0.8rem; }
     .card-actions { display: flex; gap: 0.4rem; }
     .share-btn { background: none; border: 1px solid #ddd; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
@@ -334,7 +333,7 @@
     </div>
   </div>
 
-  <!-- 맛집 등록 모달 (사진 첨부 기능 삭제) -->
+  <!-- 맛집 등록 모달 -->
   <div id="placeModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -497,7 +496,6 @@
         category: '흑돼지',
         address: '제주특별자치도 서귀포시 안덕면 사계남로 182',
         desc: '사계 해변을 보며 즐기는 흑돼지 구이입니다.',
-        imgSrc: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80',
         lat: 33.2320,
         lng: 126.3110
       }
@@ -768,7 +766,7 @@
       }
 
       closePensionEditModal();
-      alert('설정이 영구 저장되었습니다.' + passMsg);
+      alert('설정이 저장되었습니다.' + passMsg);
     }
 
     /* --- RESTAURANT & MAP HELPERS --- */
@@ -785,6 +783,7 @@
       localStorage.setItem(RESTAURANT_STORAGE_KEY, JSON.stringify(list));
     }
 
+    // 지도 초기화: 숙소 주소를 최우선으로 중심점에 설정
     function initKakaoMap() {
       const mapContainer = document.getElementById('map');
       if (!mapContainer) return;
@@ -806,13 +805,13 @@
           map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
 
           renderPensionMarker(coords, pensionInfo.name, pensionInfo.address);
-          renderFilteredView();
+          renderFilteredView(true); // 숙소 중심 유지 옵션
         });
       }
     }
 
     function renderPensionMarker(coords, name, address) {
-      pensionMarker = new kakao.maps.Marker({ position: coords, map: map, zIndex: 10 });
+      pensionMarker = new kakao.maps.Marker({ position: coords, map: map, zIndex: 100 });
       const content = `
         <div style="padding:10px; width:200px; font-size:12px; line-height:1.4;">
           <span style="background:#ff6b35; color:#fff; padding:2px 5px; border-radius:3px; font-size:10px; font-weight:bold;">숙소 위치</span><br>
@@ -858,7 +857,7 @@
       document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentCategory = category;
-      renderFilteredView();
+      renderFilteredView(false);
     }
 
     function handleSearchKeyup(e) {
@@ -868,10 +867,10 @@
     function executeSearch() {
       const input = document.getElementById('searchInput');
       searchKeyword = input ? input.value.trim().toLowerCase() : '';
-      renderFilteredView();
+      renderFilteredView(false);
     }
 
-    function renderFilteredView() {
+    function renderFilteredView(isInitial = false) {
       const allList = getSavedRestaurants();
       const cardGrid = document.getElementById('cardGrid');
       if (cardGrid) cardGrid.innerHTML = '';
@@ -893,7 +892,7 @@
       });
 
       let bounds;
-      if (typeof kakao !== 'undefined' && kakao.maps && map) {
+      if (typeof kakao !== 'undefined' && kakao.maps && map && !isInitial) {
         bounds = new kakao.maps.LatLngBounds();
       }
 
@@ -909,16 +908,18 @@
           appendCardToList(data);
           if (data.lat && data.lng && typeof kakao !== 'undefined' && kakao.maps && map) {
             const coords = addMarkerToMap(data.id, data.lat, data.lng, data.title, data.category, data.desc);
-            if (coords) bounds.extend(coords);
+            if (bounds && coords) bounds.extend(coords);
           }
         });
       }
 
-      if (filtered.length > 0 && bounds && !bounds.isEmpty()) {
+      // 검색/필터 시에만 맛집 마커로 지도 범위 이동 (초기 로딩 시에는 숙소 중심 유지)
+      if (!isInitial && filtered.length > 0 && bounds && !bounds.isEmpty()) {
         map.setBounds(bounds);
       }
     }
 
+    // 맛집 목록 카드 렌더링 (사진 태그 제거)
     function appendCardToList(data) {
       const cardGrid = document.getElementById('cardGrid');
       if (!cardGrid) return;
@@ -931,12 +932,10 @@
       const safeCategory = (data.category || '').replace(/'/g, "\\'");
       const safeDesc = (data.desc || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
       const safeAddress = (data.address || '').replace(/'/g, "\\'");
-      const safeImgSrc = (data.imgSrc || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80').replace(/'/g, "\\'");
 
       const deleteBtnStyle = isAdmin ? 'display: inline-block;' : 'display: none;';
 
       newCard.innerHTML = `
-        <img src="${safeImgSrc}" alt="${data.title}" class="card-img">
         <div class="card-body">
           <span class="card-tag">${data.category}</span>
           <h3 class="card-title">${data.title}</h3>
@@ -944,7 +943,7 @@
           <div class="card-footer">
             <span style="font-size: 0.8rem; color: #888;">주소: ${data.address}</span>
             <div class="card-actions">
-              <button class="share-btn" onclick="shareToKakao('${safeTitle}', '${safeCategory}', '${safeDesc}', '${safeAddress}', '${safeImgSrc}')">💬 공유</button>
+              <button class="share-btn" onclick="shareToKakao('${safeTitle}', '${safeCategory}', '${safeDesc}', '${safeAddress}')">💬 공유</button>
               <button class="delete-btn" style="${deleteBtnStyle}" onclick="deleteRestaurant('${data.id}')">삭제</button>
             </div>
           </div>
@@ -961,11 +960,11 @@
       if (!confirm('정말 이 맛집을 삭제하시겠습니까?')) return;
       const list = getSavedRestaurants().filter(item => item.id !== id);
       saveAllRestaurants(list);
-      renderFilteredView();
+      renderFilteredView(false);
       alert('맛집이 삭제되었습니다.');
     }
 
-    /* --- MODAL FORM SUBMIT (사진 첨부 없는 관리자 전용 맛집 등록) --- */
+    /* --- MODAL FORM SUBMIT --- */
     function openModal() {
       if (!isAdmin) {
         alert('관리자 로그인 후 맛집을 등록할 수 있습니다.');
@@ -988,10 +987,7 @@
       const address = document.getElementById('modalAddress').value;
       const desc = document.getElementById('modalDesc').value;
 
-      // 기본 맛집 대표 이미지 설정
-      const imgSrc = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80';
-
-      processRegistration({ title, category, address, desc, imgSrc });
+      processRegistration({ title, category, address, desc });
     }
 
     function processRegistration(data) {
@@ -1008,7 +1004,7 @@
             list.unshift(data);
             saveAllRestaurants(list);
 
-            renderFilteredView();
+            renderFilteredView(false);
             map.setCenter(new kakao.maps.LatLng(data.lat, data.lng));
             map.setLevel(4);
 
@@ -1022,7 +1018,7 @@
         const list = getSavedRestaurants();
         list.unshift(data);
         saveAllRestaurants(list);
-        renderFilteredView();
+        renderFilteredView(false);
         alert(`'${data.title}' 맛집이 등록되었습니다!`);
         closeModal();
       }
@@ -1135,14 +1131,10 @@
     }
 
     /* --- KAKAO SHARE --- */
-    function shareToKakao(title, category, desc, address, imgSrc) {
+    function shareToKakao(title, category, desc, address) {
       if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         alert('카카오 SDK 키 설정이 필요합니다.');
         return;
-      }
-      let sendImgUrl = imgSrc;
-      if (!sendImgUrl || sendImgUrl.startsWith('data:image')) {
-        sendImgUrl = 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80';
       }
 
       Kakao.Share.sendDefault({
@@ -1150,7 +1142,7 @@
         content: {
           title: `[제주 맛집] ${title}`,
           description: `[${category}] ${desc || '제주 추천 맛집입니다.'}\n📍 주소: ${address}`,
-          imageUrl: sendImgUrl,
+          imageUrl: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80',
           link: { mobileWebUrl: window.location.href, webUrl: window.location.href },
         },
         buttons: [{ title: '맛집 위치 및 정보 보기', link: { mobileWebUrl: window.location.href, webUrl: window.location.href } }]
@@ -1166,7 +1158,7 @@
       if (typeof kakao !== 'undefined' && kakao.maps) {
         kakao.maps.load(initKakaoMap);
       } else {
-        renderFilteredView();
+        renderFilteredView(true);
       }
     });
 
