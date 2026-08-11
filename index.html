@@ -552,11 +552,7 @@
         id: 'notice_1',
         category: '공지',
         title: '🏡 스페이스농농 이용 수칙 및 입퇴실 안내',
-        content: '안녕하세요 사장입니다!
-
-1. 체크인: 오후 3시 / 체크아웃: 오전 11시
-2. 객실 내 육류/생선 구이는 금지되어 있으니 개별 바비큐장을 이용해 주세요.
-3. 밤 10시 이후에는 타 객실을 위해 정숙 부탁드립니다.',
+        content: '안녕하세요 사장입니다!\n\n1. 체크인: 오후 3시 / 체크아웃: 오전 11시\n2. 객실 내 육류/생선 구이는 금지되어 있으니 개별 바비큐장을 이용해 주세요.\n3. 밤 10시 이후에는 타 객실을 위해 정숙 부탁드립니다.',
         date: '2026-08-01'
       }
     ];
@@ -994,12 +990,11 @@
       newCard.className = 'card';
       newCard.id = `card-${data.id}`;
 
-      const safeTitle = (data.title || '').replace(/'/g, "\'");
-      const safeCategory = (data.category || '').replace(/'/g, "\'");
-      const safeDesc = (data.desc || '').replace(/'/g, "\'").replace(/
-/g, ' ');
-      const safeAddress = (data.address || '').replace(/'/g, "\'");
-      const safeImgSrc = (data.imgSrc || '').replace(/'/g, "\'");
+      const safeTitle = (data.title || '').replace(/'/g, "\\'");
+      const safeCategory = (data.category || '').replace(/'/g, "\\'");
+      const safeDesc = (data.desc || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
+      const safeAddress = (data.address || '').replace(/'/g, "\\'");
+      const safeImgSrc = (data.imgSrc || '').replace(/'/g, "\\'");
 
       const deleteBtnStyle = isAdmin ? 'display: inline-block;' : 'display: none;';
 
@@ -1231,8 +1226,7 @@
         objectType: 'feed',
         content: {
           title: `[제주 맛집] ${title}`,
-          description: `[${category}] ${desc || '제주 추천 맛집입니다.'}
-📍 주소: ${address}`,
+          description: `[${category}] ${desc || '제주 추천 맛집입니다.'}\n📍 주소: ${address}`,
           imageUrl: sendImgUrl,
           link: { mobileWebUrl: window.location.href, webUrl: window.location.href },
         },
