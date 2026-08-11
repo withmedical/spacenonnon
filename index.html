@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>스페이스농농 & 제주 맛집 지도 🍊</title>
 
-  <!-- 카카오 지도 및 공유 SDK (새로 발급받으신 JavaScript 키 적용 완료) -->
+  <!-- 카카오 지도 및 공유 SDK -->
   <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f44caba9969d8981c76497254ccb4b04&libraries=services"></script>
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js"></script>
 
@@ -188,7 +188,7 @@
     <h1 id="heroTitle">제주 바다 앞 숙소 & 사장님 추천 맛집</h1>
     <p id="heroSub">스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.</p>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="지역(예: 애월, 성산), 음식점 이름, 음식 종류 검색" onkeyup="handleSearchKeyup(event)">
+      <input type="text" id="searchInput" placeholder="지역(예: 안덕면, 사계리), 음식점 이름, 음식 종류 검색" onkeyup="handleSearchKeyup(event)">
       <button type="button" onclick="executeSearch()">검색</button>
     </div>
   </section>
@@ -373,7 +373,7 @@
       <form id="placeForm" onsubmit="handleFormSubmit(event)">
         <div class="form-group">
           <label for="modalTitle">맛집 이름 <span class="required">*</span></label>
-          <input type="text" id="modalTitle" placeholder="예: 애월 해변 흑돼지" required>
+          <input type="text" id="modalTitle" placeholder="예: 안덕 해변 흑돼지" required>
         </div>
         <div class="form-group">
           <label for="modalCategory">카테고리 <span class="required">*</span></label>
@@ -381,7 +381,7 @@
         </div>
         <div class="form-group">
           <label for="modalAddress">주소 <span class="required">*</span></label>
-          <input type="text" id="modalAddress" placeholder="도로명 주소 입력 (예: 제주 제주시 애월읍 애월해안로 560)" required>
+          <input type="text" id="modalAddress" placeholder="도로명 주소 입력 (예: 제주 서귀포시 안덕면 사계남로 180)" required>
         </div>
         <div class="form-group">
           <label for="modalDesc">한줄 추천평</label>
@@ -477,7 +477,7 @@
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
-    // 카카오 SDK 초기화 (새로 전달해주신 JavaScript 키 적용)
+    // 카카오 SDK 초기화
     if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
       Kakao.init('f44caba9969d8981c76497254ccb4b04');
     }
@@ -504,12 +504,10 @@
       { name: '도민맛집', icon: '👍' }
     ];
 
-    // 🏡 영구 기본 펜션 정보 데이터
+    // 🏡 영구 기본 펜션 정보 데이터 (요청하신 주소로 변경)
     const DEFAULT_PENSION = {
       name: "🏡 스페이스농농",
       sub: "제주 바다와 노을을 한눈에 담을 수 있는 감성 숙소입니다.",
-      lat: 33.4655,
-      lng: 126.3200,
       address: "제주특별자치도 서귀포시 안덕면 사계북로41번길 27-45",
       tel: "010-XXXX-XXXX",
       allowShare: true,
@@ -537,13 +535,13 @@
     const DEFAULT_RESTAURANTS = [
       {
         id: 'rest_1',
-        title: '해변 오션뷰 흑돼지 구이',
+        title: '안덕 사계 오션뷰 흑돼지',
         category: '흑돼지',
-        address: '제주특별자치도 제주시 애월읍 애월해안로 560',
-        desc: '바다를 보며 즐기는 흑돼지 구이. 노을 질 때 가면 분위기 최강입니다.',
+        address: '제주특별자치도 서귀포시 안덕면 사계남로 182',
+        desc: '사계 해변을 보며 즐기는 흑돼지 구이입니다.',
         imgSrc: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80',
-        lat: 33.4655,
-        lng: 126.3200
+        lat: 33.2320,
+        lng: 126.3110
       }
     ];
 
@@ -663,13 +661,11 @@
       });
     }
 
-    // 메인 카테고리 퀵 메뉴 렌더링
     function renderCategoriesUI(catList) {
       const container = document.getElementById('categoryContainer');
       if (!container) return;
       container.innerHTML = '';
 
-      // 전체 버튼
       const allBtn = document.createElement('button');
       allBtn.className = `category-btn ${currentCategory === 'ALL' ? 'active' : ''}`;
       allBtn.setAttribute('data-category', 'ALL');
@@ -687,7 +683,6 @@
       });
     }
 
-    // 맛집 등록 모달 dropdown 옵션 렌더링
     function renderModalCategoryOptions(catList) {
       const select = document.getElementById('modalCategory');
       if (!select) return;
@@ -704,7 +699,6 @@
       select.appendChild(optEtc);
     }
 
-    // 관리자 모달 내 카테고리 관리 필드 제어
     function openPensionEditModal() {
       if (!isAdmin) return;
       const info = getPensionInfo();
@@ -718,7 +712,6 @@
       document.getElementById('editHeroTitle').value = info.heroTitle || '';
       document.getElementById('editHeroSub').value = info.heroSub || '';
 
-      // 카테고리 관리 필드 구성
       const editCategoryContainer = document.getElementById('editCategoryContainer');
       editCategoryContainer.innerHTML = '';
       const catList = info.categories || DEFAULT_CATEGORIES;
@@ -726,7 +719,6 @@
         addCategoryEditRow(cat.icon, cat.name);
       });
 
-      // 갤러리 관리 필드 구성
       const editGalleryContainer = document.getElementById('editGalleryContainer');
       editGalleryContainer.innerHTML = '';
       const galleryList = info.gallery || [];
@@ -791,7 +783,6 @@
       e.preventDefault();
       const currentInfo = getPensionInfo();
 
-      // 카테고리 데이터 수집
       const iconInputs = document.querySelectorAll('.input-cat-icon');
       const nameInputs = document.querySelectorAll('.input-cat-name');
       const newCategories = [];
@@ -804,7 +795,6 @@
         }
       });
 
-      // 갤러리 데이터 수집
       const urlInputs = document.querySelectorAll('.input-gallery-url');
       const capInputs = document.querySelectorAll('.input-gallery-cap');
       const newGallery = [];
@@ -840,7 +830,14 @@
 
       localStorage.setItem(PENSION_INFO_KEY, JSON.stringify(updated));
       renderPensionInfo();
-      renderFilteredView();
+      
+      // 주소가 바뀌었으면 지도 중심 재설정
+      if (typeof kakao !== 'undefined' && kakao.maps && map) {
+        initKakaoMap();
+      } else {
+        renderFilteredView();
+      }
+
       closePensionEditModal();
       alert('펜션 정보 및 카테고리 설정이 저장되었습니다.' + passMsg);
     }
@@ -864,20 +861,32 @@
       mapContainer.innerHTML = '';
 
       const pensionInfo = getPensionInfo();
-      const pensionCoords = new kakao.maps.LatLng(pensionInfo.lat, pensionInfo.lng);
-      const mapOption = { center: pensionCoords, level: 7 };
 
-      map = new kakao.maps.Map(mapContainer, mapOption);
-      map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
+      // 카카오 Geocoder로 주소를 위도/경도 좌표로 자동 변환
+      if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.addressSearch(pensionInfo.address, function(result, status) {
+          let coords;
+          if (status === kakao.maps.services.Status.OK) {
+            coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+          } else {
+            // 주소 검색 실패 시 서귀포시 안덕면 기본 좌표 설정
+            coords = new kakao.maps.LatLng(33.2420, 126.3235);
+          }
 
-      renderPensionMarker(pensionCoords, pensionInfo.name, pensionInfo.address);
-      renderFilteredView();
+          map = new kakao.maps.Map(mapContainer, { center: coords, level: 7 });
+          map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
+
+          renderPensionMarker(coords, pensionInfo.name, pensionInfo.address);
+          renderFilteredView();
+        });
+      }
     }
 
     function renderPensionMarker(coords, name, address) {
       pensionMarker = new kakao.maps.Marker({ position: coords, map: map, zIndex: 10 });
       const content = `
-        <div style="padding:10px; width:190px; font-size:12px; line-height:1.4;">
+        <div style="padding:10px; width:200px; font-size:12px; line-height:1.4;">
           <span style="background:#ff6b35; color:#fff; padding:2px 5px; border-radius:3px; font-size:10px; font-weight:bold;">숙소 위치</span><br>
           <b style="font-size:13px; color:#222; display:inline-block; margin-top:3px;">${name}</b><br>
           <span style="color:#666; font-size:11px;">${address}</span>
@@ -1090,7 +1099,7 @@
 
             alert(`'${data.title}' 맛집이 저장되었습니다!`);
           } else {
-            alert('입력하신 주소를 찾을 수 없어 저장하지 못했습니다.');
+            alert('입력하신 주소를 찾을 수 없어 저장하지 못했습니다. 도로명 주소를 정확히 입력해 주세요.');
             return;
           }
           closeModal();
