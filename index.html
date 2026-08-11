@@ -42,10 +42,7 @@
       color: #fff; text-align: center; padding: 4rem 1rem; transition: background 0.3s ease;
     }
     .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
-    .hero p { font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.9; }
-    .search-bar { max-width: 500px; margin: 0 auto; display: flex; gap: 0.5rem; }
-    .search-bar input { flex: 1; padding: 0.8rem; border: none; border-radius: 6px; font-size: 1rem; outline: none; }
-    .search-bar button { padding: 0.8rem 1.2rem; background: #ff6b35; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .hero p { font-size: 1.1rem; opacity: 0.9; }
 
     /* 메인 컨테이너 */
     .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
@@ -145,7 +142,6 @@
     .category-edit-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
     .category-edit-row input { flex: 1; }
 
-    /* 이미지 파일 미리보기 스타일 */
     .gallery-preview-box {
       width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 6px; margin-top: 0.4rem; overflow: hidden; background: #fafafa; display: flex; align-items: center; justify-content: center;
     }
@@ -159,7 +155,6 @@
     /* 푸터 */
     footer { background: #333; color: #ccc; text-align: center; padding: 2rem 1rem; margin-top: 4rem; font-size: 0.9rem; }
 
-    /* 모바일 반응형 처리 */
     @media (max-width: 768px) {
       .nav-links { gap: 0.8rem; font-size: 0.85rem; }
       .hero h1 { font-size: 1.6rem; }
@@ -186,14 +181,10 @@
     </div>
   </header>
 
-  <!-- 2. 히어로 섹션 (메인 배너) -->
+  <!-- 2. 히어로 섹션 (검색창 제외 메인 배너) -->
   <section class="hero" id="heroBanner">
     <h1 id="heroTitle">제주 바다 앞 숙소 & 사장님 추천 맛집</h1>
     <p id="heroSub">스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.</p>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="지역(예: 안덕면, 건입동), 음식점 이름, 음식 종류 검색" onkeyup="handleSearchKeyup(event)">
-      <button type="button" onclick="executeSearch()">검색</button>
-    </div>
   </section>
 
   <div class="container">
@@ -278,7 +269,7 @@
     </div>
   </div>
 
-  <!-- 펜션 정보 및 사진 수정 모달 (파일 업로드 지원) -->
+  <!-- 펜션 정보 및 사진 수정 모달 -->
   <div id="pensionEditModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -462,12 +453,10 @@
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
-    // 카카오 SDK 초기화
     if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
       Kakao.init('f44caba9969d8981c76497254ccb4b04');
     }
 
-    // LOCAL STORAGE KEYS
     const ADMIN_PASS_KEY = 'pension_admin_password';
     const NOTICE_STORAGE_KEY = 'pension_notice_list';
     const PENSION_INFO_KEY = 'pension_info_data';
@@ -508,7 +497,6 @@
     let pensionInfoWindow = null;
     const activeMarkers = {};
     let currentCategory = 'ALL';
-    let searchKeyword = '';
 
     const DEFAULT_NOTICES = [
       {
@@ -790,16 +778,20 @@
         passMsg = ' (비밀번호 변경 완료)';
       }
 
-      localStorage.setItem(PENSION_INFO_KEY, JSON.stringify(updated));
-      renderPensionInfo();
-      if (typeof kakao !== 'undefined' && kakao.maps && map) {
-        initKakaoMap();
-      } else {
-        renderFilteredView(false);
-      }
+      try {
+        localStorage.setItem(PENSION_INFO_KEY, JSON.stringify(updated));
+        renderPensionInfo();
+        if (typeof kakao !== 'undefined' && kakao.maps && map) {
+          initKakaoMap();
+        } else {
+          renderFilteredView(false);
+        }
 
-      closePensionEditModal();
-      alert('펜션 설정 및 이미지 정보가 저장되었습니다.' + passMsg);
+        closePensionEditModal();
+        alert('펜션 설정 및 이미지 정보가 성공적으로 저장되었습니다.' + passMsg);
+      } catch (err) {
+        alert('사진 용량이 너무 커서 저장에 실패했습니다. 더 작게 압축된 이미지 파일을 이용해 주세요.');
+      }
     }
 
     /* --- SUPABASE DATA & MAP HELPERS --- */
@@ -905,16 +897,6 @@
       renderFilteredView(false);
     }
 
-    function handleSearchKeyup(e) {
-      if (e.key === 'Enter') executeSearch();
-    }
-
-    function executeSearch() {
-      const input = document.getElementById('searchInput');
-      searchKeyword = input ? input.value.trim().toLowerCase() : '';
-      renderFilteredView(false);
-    }
-
     async function renderFilteredView(isInitial = false) {
       const allList = await fetchRestaurantsFromSupabase();
       const cardGrid = document.getElementById('cardGrid');
@@ -927,16 +909,7 @@
       for (let k in activeMarkers) delete activeMarkers[k];
 
       const filtered = allList.filter(item => {
-        const matchesCategory = (currentCategory === 'ALL') || (item.category === currentCategory);
-        let matchesKeyword = true;
-        if (searchKeyword !== '') {
-          const t = (item.title || '').toLowerCase();
-          const a = (item.address || '').toLowerCase();
-          const c = (item.category || '').toLowerCase();
-          const d = (item.desc || '').toLowerCase();
-          matchesKeyword = t.includes(searchKeyword) || a.includes(searchKeyword) || c.includes(searchKeyword) || d.includes(searchKeyword);
-        }
-        return matchesCategory && matchesKeyword;
+        return (currentCategory === 'ALL') || (item.category === currentCategory);
       });
 
       let bounds;
