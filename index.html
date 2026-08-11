@@ -87,7 +87,7 @@
     .map-section { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2.5rem; }
     .map-placeholder { width: 100%; height: 400px; background: #e5e3df; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666; font-weight: bold; }
 
-    /* 맛집 카드 리스트 Grid (클릭 가능하도록 cursor: pointer 추가) */
+    /* 맛집 카드 리스트 Grid */
     .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
     .card { background: #fff; border-radius: 10px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
     .card:hover { transform: translateY(-4px); border-color: #ff6b35; }
@@ -102,7 +102,7 @@
     .delete-btn { background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: none; }
     .delete-btn:hover { background: #ff4d4f; color: #fff; }
 
-    /* 관리자 전용 등록 버튼 요소 제어 */
+    /* 관리자 전용 요소 제어 */
     .admin-only-btn { display: none; }
 
     /* 모달 공통 스타일 */
@@ -176,7 +176,7 @@
     <h1 id="heroTitle">제주 바다 앞 숙소 & 사장님 추천 맛집</h1>
     <p id="heroSub">스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.</p>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="지역(예: 안덕면, 사계리), 음식점 이름, 음식 종류 검색" onkeyup="handleSearchKeyup(event)">
+      <input type="text" id="searchInput" placeholder="지역(예: 안덕면, 건입동), 음식점 이름, 음식 종류 검색" onkeyup="handleSearchKeyup(event)">
       <button type="button" onclick="executeSearch()">검색</button>
     </div>
   </section>
@@ -485,17 +485,28 @@
     let map = null;
     let pensionMarker = null;
     let pensionInfoWindow = null;
-    const activeMarkers = {}; // { id: { marker, infowindow } }
+    const activeMarkers = {};
     let currentCategory = 'ALL';
     let searchKeyword = '';
 
+    /* 📌 [방법 2 적용] 소스 코드에 고정 저장할 기본 추천 맛집 데이터 배열 */
+    /* 사장님께서 고정하고 싶으신 맛집들을 아래 항목 형태로 자유롭게 추가하시면 됩니다. */
     const DEFAULT_RESTAURANTS = [
       {
         id: 'rest_1',
+        title: '산지해장국',
+        category: '도민맛집',
+        address: '제주특별자치도 제주시 건입동 1319-121',
+        desc: '도민들이 즐겨찾는 푸짐하고 얼큰한 해장국 맛집입니다.',
+        lat: 33.5140,
+        lng: 126.5280
+      },
+      {
+        id: 'rest_2',
         title: '안덕 사계 오션뷰 흑돼지',
         category: '흑돼지',
         address: '제주특별자치도 서귀포시 안덕면 사계남로 182',
-        desc: '사계 해변을 보며 즐기는 흑돼지 구이입니다.',
+        desc: '사계 해변을 보며 즐기는 오션뷰 흑돼지 구이입니다.',
         lat: 33.2320,
         lng: 126.3110
       }
@@ -842,7 +853,6 @@
         removable: true
       });
 
-      // 마커 보관
       activeMarkers[id] = { marker: marker, infowindow: infowindow, coords: coords };
 
       kakao.maps.event.addListener(marker, 'click', function () {
@@ -852,19 +862,13 @@
       return coords;
     }
 
-    // 🎯 맛집 카드를 클릭했을 때 해당 맛집으로 지도 이동 및 인포윈도우 열기 함수
     function focusRestaurantOnMap(id) {
       if (!map || !activeMarkers[id]) return;
 
       const target = activeMarkers[id];
-
-      // 지도 부드럽게 이동
       map.panTo(target.coords);
-
-      // 인포윈도우 열기
       target.infowindow.open(map, target.marker);
 
-      // 지도 섹션 위치로 화면 스크롤
       const mapElem = document.getElementById('mapSection');
       if (mapElem) {
         mapElem.scrollIntoView({ behavior: 'smooth' });
@@ -894,7 +898,6 @@
       const cardGrid = document.getElementById('cardGrid');
       if (cardGrid) cardGrid.innerHTML = '';
 
-      // 기존 마커 및 인포윈도우 제거
       Object.keys(activeMarkers).forEach(id => {
         if (activeMarkers[id].marker) activeMarkers[id].marker.setMap(null);
         if (activeMarkers[id].infowindow) activeMarkers[id].infowindow.close();
@@ -941,7 +944,6 @@
       }
     }
 
-    // 맛집 카드 생성 (사진 <img> 태그 완전히 제외)
     function appendCardToList(data) {
       const cardGrid = document.getElementById('cardGrid');
       if (!cardGrid) return;
@@ -949,9 +951,8 @@
       const newCard = document.createElement('article');
       newCard.className = 'card';
       newCard.id = `card-${data.id}`;
-      // 🎯 카드 클릭 시 지도 위치로 이동하는 이벤트 바인딩
+
       newCard.onclick = function(e) {
-        // 공유/삭제 버튼 클릭 시 카드 전체 클릭 이벤트 발동 방지
         if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
         focusRestaurantOnMap(data.id);
       };
