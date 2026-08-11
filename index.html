@@ -22,12 +22,10 @@
   </script>
 
   <style>
-    /* 기본 스타일 초기화 */
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
     body { color: #333; line-height: 1.6; background-color: #f9f9f9; }
     a { text-decoration: none; color: inherit; }
 
-    /* 헤더 & 네비게이션 */
     header { background: #fff; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000; }
     .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 1rem; }
     .logo { font-size: 1.4rem; font-weight: bold; color: #ff6b35; cursor: pointer; }
@@ -36,7 +34,6 @@
     .admin-nav-btn { background: #222; color: #fff; padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer; border: none; }
     .admin-nav-btn.active { background: #e63946; }
 
-    /* 히어로 섹션 */
     .hero { 
       background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80') center/cover; 
       color: #fff; text-align: center; padding: 4rem 1rem; transition: background 0.3s ease;
@@ -44,15 +41,10 @@
     .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
     .hero p { font-size: 1.1rem; opacity: 0.9; }
 
-    /* 메인 컨테이너 */
     .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
     .section-title { font-size: 1.5rem; margin-bottom: 1rem; color: #222; }
 
-    /* 펜션 소개 섹션 스타일 */
-    .pension-section {
-      background: #fff; border-radius: 12px; padding: 2rem; margin-bottom: 2.5rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #ffe8df;
-    }
+    .pension-section { background: #fff; border-radius: 12px; padding: 2rem; margin-bottom: 2.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #ffe8df; }
     .pension-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .pension-badge { background: #ff6b35; color: #fff; font-size: 0.75rem; font-weight: bold; padding: 0.2rem 0.6rem; border-radius: 12px; display: inline-block; margin-bottom: 0.4rem; }
     .pension-title { font-size: 1.5rem; color: #222; }
@@ -62,7 +54,6 @@
     .pension-info-btn:hover { background: #555; }
     .pension-edit-btn { background: #e63946; color: #fff; border: none; padding: 0.7rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; display: none; }
 
-    /* 펜션 갤러리 그리드 레이아웃 */
     .pension-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .gallery-item { position: relative; border-radius: 8px; overflow: hidden; height: 180px; }
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
@@ -70,7 +61,6 @@
     .gallery-item.main-img { grid-column: span 2; grid-row: span 2; height: 370px; }
     .img-caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: #fff; padding: 0.5rem; font-size: 0.85rem; text-align: center; }
 
-    /* 📢 펜션 소식/공지 섹션 */
     .notice-section { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
     .add-notice-btn { background: #ff6b35; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: none; }
@@ -87,16 +77,13 @@
     .notice-item-title { font-size: 0.95rem; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .notice-item-date { font-size: 0.8rem; color: #888; white-space: nowrap; }
 
-    /* 카테고리 퀵 메뉴 */
     .categories { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
     .category-btn { background: #fff; border: 1px solid #ddd; padding: 0.6rem 1.2rem; border-radius: 20px; white-space: nowrap; cursor: pointer; font-weight: 500; }
     .category-btn.active { background: #ff6b35; color: #fff; border-color: #ff6b35; }
 
-    /* 지도 섹션 */
     .map-section { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2.5rem; }
     .map-placeholder { width: 100%; height: 400px; background: #e5e3df; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666; font-weight: bold; }
 
-    /* 맛집 카드 리스트 Grid */
     .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
     .card { background: #fff; border-radius: 10px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
     .card:hover { transform: translateY(-4px); border-color: #ff6b35; }
@@ -108,57 +95,31 @@
     .delete-btn { background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: none; }
     .delete-btn:hover { background: #ff4d4f; color: #fff; }
 
-    /* 관리자 전용 요소 제어 */
     .admin-only-btn { display: none; }
 
-    /* 모달 공통 스타일 */
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center; padding: 1rem;
-    }
-    .modal-content {
-      background: #fff; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-      border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); padding: 1.5rem; animation: fadeIn 0.3s ease-out;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center; padding: 1rem; }
+    .modal-content { background: #fff; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); padding: 1.5rem; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1.2rem; }
     .modal-header h2 { font-size: 1.25rem; color: #222; }
     .close-btn { background: none; border: none; font-size: 1.8rem; color: #888; cursor: pointer; }
-    .close-btn:hover { color: #000; }
     .form-group { margin-bottom: 1rem; text-align: left; }
     .form-group label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 0.4rem; color: #444; }
     .required { color: #ff6b35; }
-    .form-group input[type="text"], .form-group input[type="password"], .form-group select, .form-group textarea, .form-group input[type="file"] {
-      width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; outline: none;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #ff6b35; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; }
 
     .form-sub-header { display: flex; justify-content: space-between; align-items: center; margin: 1.2rem 0 0.6rem 0; border-top: 1px dashed #eee; padding-top: 0.8rem; }
     .form-sub-title { font-size: 0.95rem; font-weight: bold; color: #ff6b35; }
     .remove-img-item-btn { background: none; border: none; color: #ff4d4f; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
     .add-img-field-btn { width: 100%; background: #f0f0f0; border: 1px dashed #bbb; color: #444; padding: 0.6rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
-    .add-img-field-btn:hover { background: #e5e5e5; }
 
-    .gallery-preview-box {
-      width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 6px; margin-top: 0.4rem; overflow: hidden; background: #fafafa; display: flex; align-items: center; justify-content: center;
-    }
+    .gallery-preview-box { width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 6px; margin-top: 0.4rem; overflow: hidden; background: #fafafa; display: flex; align-items: center; justify-content: center; }
     .gallery-preview-box img { width: 100%; height: 100%; object-fit: cover; }
 
     .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee; }
     .btn-cancel { padding: 0.7rem 1.2rem; background: #eee; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: #555; }
     .btn-submit { padding: 0.7rem 1.2rem; background: #ff6b35; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .btn-submit:hover { background: #e55a2b; }
 
     footer { background: #333; color: #ccc; text-align: center; padding: 2rem 1rem; margin-top: 4rem; font-size: 0.9rem; }
-
-    @media (max-width: 768px) {
-      .nav-links { gap: 0.8rem; font-size: 0.85rem; }
-      .hero h1 { font-size: 1.6rem; }
-      .pension-gallery { grid-template-columns: repeat(2, 1fr); }
-      .gallery-item.main-img { grid-column: span 2; grid-row: span 1; height: 220px; }
-      .gallery-item { height: 140px; }
-      .map-placeholder { height: 300px; }
-    }
   </style>
 </head>
 <body>
@@ -238,7 +199,6 @@
 
   </div>
 
-  <!-- 푸터 -->
   <footer>
     <p>&copy; 2026 스페이스농농 & 제주 맛집 플랫폼. All rights reserved.</p>
   </footer>
@@ -330,7 +290,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn-cancel" onclick="closePensionEditModal()">취소</button>
-          <button type="submit" class="btn-submit">저장하기</button>
+          <button type="submit" class="btn-submit">Supabase DB에 저장</button>
         </div>
       </form>
     </div>
@@ -449,7 +409,6 @@
 
     const ADMIN_PASS_KEY = 'pension_admin_password';
     const NOTICE_STORAGE_KEY = 'pension_notice_list';
-    const PENSION_INFO_KEY = 'pension_info_data';
 
     function getAdminPassword() {
       return localStorage.getItem(ADMIN_PASS_KEY) || '1234';
@@ -457,8 +416,6 @@
 
     let isAdmin = false;
 
-    /* 📌 [방법 B 적용] 소스코드에 영구 고정된 카테고리 목록 */
-    /* 원하시는 카테고리가 있으시면 아래 배열에 직접 추가하시면 됩니다. */
     const DEFAULT_CATEGORIES = [
       { name: '흑돼지', icon: '🐷' },
       { name: '해산물/회', icon: '🐟' },
@@ -551,38 +508,83 @@
       }
     }
 
-    /* --- 파일 업로드 (FileReader Base64 변환) 핸들러 --- */
-    function handleHeroBgUpload(e) {
+    /* 📌 Supabase Storage 업로드 연동 함수 */
+    async function uploadImageToSupabaseStorage(file) {
+      if (!file) return null;
+
+      // 이미지 파일명 고유화 (타임스탬프 + 파일명)
+      const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+
+      // Supabase Storage 'pension-gallery' 버킷에 업로드
+      const { data, error } = await supabaseClient
+        .storage
+        .from('pension-gallery')
+        .upload(fileName, file);
+
+      if (error) {
+        console.error('Storage Upload Error:', error);
+        alert('이미지 업로드 실패: ' + error.message);
+        return null;
+      }
+
+      // 업로드된 이미지의 공개 URL 주소 생성
+      const { data: publicUrlData } = supabaseClient
+        .storage
+        .from('pension-gallery')
+        .getPublicUrl(fileName);
+
+      return publicUrlData.publicUrl;
+    }
+
+    /* 파일 선택 시 Supabase Storage에 즉시 업로드하고 미리보기 연결 */
+    async function handleHeroBgUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById('editHeroBg').value = evt.target.result;
-        document.getElementById('editHeroBgPreview').src = evt.target.result;
-      };
-      reader.readAsDataURL(file);
+
+      const publicUrl = await uploadImageToSupabaseStorage(file);
+      if (publicUrl) {
+        document.getElementById('editHeroBg').value = publicUrl;
+        document.getElementById('editHeroBgPreview').src = publicUrl;
+      }
     }
 
-    function handleGalleryFileUpload(e, id) {
+    async function handleGalleryFileUpload(e, id) {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById(`gallery-url-input-${id}`).value = evt.target.result;
-        document.getElementById(`gallery-preview-${id}`).src = evt.target.result;
+
+      const publicUrl = await uploadImageToSupabaseStorage(file);
+      if (publicUrl) {
+        document.getElementById(`gallery-url-input-${id}`).value = publicUrl;
+        document.getElementById(`gallery-preview-${id}`).src = publicUrl;
+      }
+    }
+
+    /* --- Supabase에서 펜션 정보 불러오기 & 저장하기 --- */
+    async function getPensionInfo() {
+      const { data, error } = await supabaseClient
+        .from('pension_info')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (error || !data) {
+        return DEFAULT_PENSION;
+      }
+
+      return {
+        name: data.name,
+        sub: data.sub,
+        address: data.address,
+        tel: data.tel,
+        heroBg: data.hero_bg,
+        heroTitle: data.hero_title,
+        heroSub: data.hero_sub,
+        gallery: data.gallery || DEFAULT_PENSION.gallery
       };
-      reader.readAsDataURL(file);
     }
 
-    /* --- PENSION INFO MANAGEMENT --- */
-    function getPensionInfo() {
-      const saved = localStorage.getItem(PENSION_INFO_KEY);
-      const data = saved ? JSON.parse(saved) : DEFAULT_PENSION;
-      return data;
-    }
-
-    function renderPensionInfo() {
-      const info = getPensionInfo();
+    async function renderPensionInfo() {
+      const info = await getPensionInfo();
       document.getElementById('siteLogo').innerText = (info.name || '스페이스농농') + ' 🍊';
       document.getElementById('pensionTitleDisplay').innerText = info.name;
       document.getElementById('pensionSubDisplay').innerText = info.sub;
@@ -646,9 +648,9 @@
       });
     }
 
-    function openPensionEditModal() {
+    async function openPensionEditModal() {
       if (!isAdmin) return;
-      const info = getPensionInfo();
+      const info = await getPensionInfo();
       document.getElementById('editPensionName').value = info.name || '';
       document.getElementById('editPensionSub').value = info.sub || '';
       document.getElementById('editPensionAddr').value = info.address || '';
@@ -704,9 +706,8 @@
       document.getElementById('pensionEditModal').style.display = 'none';
     }
 
-    function handlePensionEditSubmit(e) {
+    async function handlePensionEditSubmit(e) {
       e.preventDefault();
-      const currentInfo = getPensionInfo();
 
       const urlInputs = document.querySelectorAll('.input-gallery-url');
       const capInputs = document.querySelectorAll('.input-gallery-cap');
@@ -717,15 +718,15 @@
         if (u) newGallery.push({ url: u, cap: c });
       });
 
-      const updated = {
-        ...currentInfo,
+      const updatedData = {
+        id: 1,
         name: document.getElementById('editPensionName').value,
         sub: document.getElementById('editPensionSub').value,
         address: document.getElementById('editPensionAddr').value,
         tel: document.getElementById('editPensionTel').value,
-        heroBg: document.getElementById('editHeroBg').value,
-        heroTitle: document.getElementById('editHeroTitle').value,
-        heroSub: document.getElementById('editHeroSub').value,
+        hero_bg: document.getElementById('editHeroBg').value,
+        hero_title: document.getElementById('editHeroTitle').value,
+        hero_sub: document.getElementById('editHeroSub').value,
         gallery: newGallery
       };
 
@@ -736,9 +737,15 @@
         passMsg = ' (비밀번호 변경 완료)';
       }
 
-      try {
-        localStorage.setItem(PENSION_INFO_KEY, JSON.stringify(updated));
-        renderPensionInfo();
+      // Supabase DB에 펜션 및 사진 데이터 저장
+      const { error } = await supabaseClient
+        .from('pension_info')
+        .upsert([updatedData]);
+
+      if (error) {
+        alert('Supabase 사진/정보 저장 실패: ' + error.message);
+      } else {
+        await renderPensionInfo();
         if (typeof kakao !== 'undefined' && kakao.maps && map) {
           initKakaoMap();
         } else {
@@ -746,9 +753,7 @@
         }
 
         closePensionEditModal();
-        alert('펜션 설정 및 이미지 정보가 성공적으로 저장되었습니다.' + passMsg);
-      } catch (err) {
-        alert('사진 용량이 너무 커서 저장에 실패했습니다. 이미지 파일의 크기를 줄여서 업로드해 주세요.');
+        alert('펜션 설정 및 이미지 정보가 Supabase DB에 영구 저장되었습니다!' + passMsg);
       }
     }
 
@@ -766,12 +771,12 @@
       return data || [];
     }
 
-    function initKakaoMap() {
+    async function initKakaoMap() {
       const mapContainer = document.getElementById('map');
       if (!mapContainer) return;
       mapContainer.innerHTML = '';
 
-      const pensionInfo = getPensionInfo();
+      const pensionInfo = await getPensionInfo();
 
       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
         const geocoder = new kakao.maps.services.Geocoder();
@@ -938,7 +943,7 @@
       }
     }
 
-    /* --- MODAL FORM SUBMIT (Supabase 맛집 신규 저장) --- */
+    /* --- MODAL FORM SUBMIT --- */
     function openModal() {
       if (!isAdmin) {
         alert('관리자 로그인 후 맛집을 등록할 수 있습니다.');
