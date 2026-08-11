@@ -87,7 +87,7 @@
     .map-section { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2.5rem; }
     .map-placeholder { width: 100%; height: 400px; background: #e5e3df; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666; font-weight: bold; }
 
-    /* 맛집 카드 리스트 Grid (사진 제거에 맞춘 깔끔한 디자인) */
+    /* 맛집 카드 리스트 Grid (사진이 제외된 깔끔한 카드 카드) */
     .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
     .card { background: #fff; border-radius: 10px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, border-color 0.2s; }
     .card:hover { transform: translateY(-4px); border-color: #ffd8cc; }
@@ -343,7 +343,7 @@
       <form id="placeForm" onsubmit="handleFormSubmit(event)">
         <div class="form-group">
           <label for="modalTitle">맛집 이름 <span class="required">*</span></label>
-          <input type="text" id="modalTitle" placeholder="예: 안덕 사계 오션뷰 흑돼지" required>
+          <input type="text" id="modalTitle" placeholder="예: 산지해장국" required>
         </div>
         <div class="form-group">
           <label for="modalCategory">카테고리 <span class="required">*</span></label>
@@ -351,7 +351,7 @@
         </div>
         <div class="form-group">
           <label for="modalAddress">도로명 주소 <span class="required">*</span></label>
-          <input type="text" id="modalAddress" placeholder="정확한 도로명 주소 입력 (예: 제주 서귀포시 안덕면 사계남로 182)" required>
+          <input type="text" id="modalAddress" placeholder="정확한 도로명 주소 입력 (예: 제주 제주시 건입동 1319-121)" required>
         </div>
         <div class="form-group">
           <label for="modalDesc">한줄 추천평</label>
@@ -489,6 +489,7 @@
     let currentCategory = 'ALL';
     let searchKeyword = '';
 
+    // 초기 맛집 예시 데이터 (이미지 데이터 항목 삭제)
     const DEFAULT_RESTAURANTS = [
       {
         id: 'rest_1',
@@ -516,7 +517,7 @@
       if (isAdmin) {
         isAdmin = false;
         updateAdminUI();
-        renderFilteredView();
+        renderFilteredView(false);
         alert('관리자 모드에서 로그아웃되었습니다.');
       } else {
         document.getElementById('adminLoginModal').style.display = 'flex';
@@ -534,7 +535,7 @@
       if (inputPass === getAdminPassword()) {
         isAdmin = true;
         updateAdminUI();
-        renderFilteredView();
+        renderFilteredView(false);
         closeAdminLoginModal();
         alert('관리자로 인증되었습니다. (맛집 등록/수정/삭제 권한 부여)');
       } else {
@@ -762,7 +763,7 @@
       if (typeof kakao !== 'undefined' && kakao.maps && map) {
         initKakaoMap();
       } else {
-        renderFilteredView();
+        renderFilteredView(false);
       }
 
       closePensionEditModal();
@@ -783,7 +784,6 @@
       localStorage.setItem(RESTAURANT_STORAGE_KEY, JSON.stringify(list));
     }
 
-    // 지도 초기화: 숙소 주소를 최우선으로 중심점에 설정
     function initKakaoMap() {
       const mapContainer = document.getElementById('map');
       if (!mapContainer) return;
@@ -805,7 +805,7 @@
           map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
 
           renderPensionMarker(coords, pensionInfo.name, pensionInfo.address);
-          renderFilteredView(true); // 숙소 중심 유지 옵션
+          renderFilteredView(true);
         });
       }
     }
@@ -913,13 +913,12 @@
         });
       }
 
-      // 검색/필터 시에만 맛집 마커로 지도 범위 이동 (초기 로딩 시에는 숙소 중심 유지)
       if (!isInitial && filtered.length > 0 && bounds && !bounds.isEmpty()) {
         map.setBounds(bounds);
       }
     }
 
-    // 맛집 목록 카드 렌더링 (사진 태그 제거)
+    // 맛집 카드 생성 (사진 <img> 태그 완전히 제외)
     function appendCardToList(data) {
       const cardGrid = document.getElementById('cardGrid');
       if (!cardGrid) return;
@@ -1011,7 +1010,7 @@
             alert(`'${data.title}' 맛집이 정상 등록 및 저장되었습니다!`);
             closeModal();
           } else {
-            alert('입력하신 주소를 찾을 수 없습니다. 도로명 주소를 정확히 입력해 주세요. (예: 제주 서귀포시 안덕면 사계남로 182)');
+            alert('입력하신 주소를 찾을 수 없습니다. 도로명 주소를 정확히 입력해 주세요. (예: 제주 제주시 건입동 1319-121)');
           }
         });
       } else {
