@@ -108,9 +108,6 @@
     .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.4rem; color: #222; }
     .card-desc { font-size: 0.9rem; color: #555; margin-bottom: 1rem; line-height: 1.5; }
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 0.8rem; }
-    .card-actions { display: flex; gap: 0.4rem; }
-    .share-btn { background: none; border: 1px solid #ddd; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
-    .share-btn:hover { background: #f0f0f0; }
     .delete-btn { background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: none; }
     .delete-btn:hover { background: #ff4d4f; color: #fff; }
 
@@ -134,7 +131,7 @@
     .form-group { margin-bottom: 1rem; text-align: left; }
     .form-group label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 0.4rem; color: #444; }
     .required { color: #ff6b35; }
-    .form-group input[type="text"], .form-group input[type="password"], .form-group select, .form-group textarea {
+    .form-group input[type="text"], .form-group input[type="password"], .form-group select, .form-group textarea, .form-group input[type="file"] {
       width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; outline: none;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #ff6b35; }
@@ -147,6 +144,12 @@
 
     .category-edit-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
     .category-edit-row input { flex: 1; }
+
+    /* 이미지 파일 미리보기 스타일 */
+    .gallery-preview-box {
+      width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 6px; margin-top: 0.4rem; overflow: hidden; background: #fafafa; display: flex; align-items: center; justify-content: center;
+    }
+    .gallery-preview-box img { width: 100%; height: 100%; object-fit: cover; }
 
     .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee; }
     .btn-cancel { padding: 0.7rem 1.2rem; background: #eee; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: #555; }
@@ -275,7 +278,7 @@
     </div>
   </div>
 
-  <!-- 펜션 정보 및 사진 수정 모달 (관리자 전용) -->
+  <!-- 펜션 정보 및 사진 수정 모달 (파일 업로드 지원) -->
   <div id="pensionEditModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -288,8 +291,12 @@
           <div class="form-sub-title">🌄 메인 상단 배너 설정</div>
         </div>
         <div class="form-group">
-          <label>배너 배경 이미지 URL</label>
-          <input type="text" id="editHeroBg" required>
+          <label>배너 배경 이미지 선택</label>
+          <input type="file" accept="image/*" onchange="handleHeroBgUpload(event)">
+          <input type="hidden" id="editHeroBg">
+          <div class="gallery-preview-box">
+            <img id="editHeroBgPreview" src="" alt="배너 미리보기">
+          </div>
         </div>
         <div class="form-group">
           <label>메인 큰 제목 문구</label>
@@ -326,6 +333,9 @@
           <input type="text" id="editPensionTel" required>
         </div>
 
+        <div class="form-sub-header">
+          <div class="form-sub-title">📷 펜션 소개 갤러리 사진 관리</div>
+        </div>
         <div id="editGalleryContainer"></div>
         <button type="button" class="add-img-field-btn" onclick="addGalleryImageField()">+ 사진 추가하기</button>
 
@@ -345,7 +355,7 @@
     </div>
   </div>
 
-  <!-- 맛집 등록 모달 (Supabase DB 연동) -->
+  <!-- 맛집 등록 모달 -->
   <div id="placeModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -443,7 +453,7 @@
         작성일: <span id="detailDate">2026-08-07</span>
       </div>
       <div id="detailContent" style="line-height:1.7; color:#333; white-space:pre-line; min-height:120px;"></div>
-      <div class="modal-footer" style="justify- space-between;">
+      <div class="modal-footer" style="justify-content: space-between;">
         <button type="button" id="deleteNoticeBtn" class="delete-btn" style="display:none;">삭제하기 (관리자)</button>
         <button type="button" class="btn-cancel" onclick="closeNoticeDetailModal()">닫기</button>
       </div>
@@ -562,6 +572,29 @@
       }
     }
 
+    /* --- 파일 업로드 (FileReader Base64 변환) 핸들러 --- */
+    function handleHeroBgUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('editHeroBg').value = evt.target.result;
+        document.getElementById('editHeroBgPreview').src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleGalleryFileUpload(e, id) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById(`gallery-url-input-${id}`).value = evt.target.result;
+        document.getElementById(`gallery-preview-${id}`).src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
     /* --- PENSION INFO & CATEGORY MANAGEMENT --- */
     function getPensionInfo() {
       const saved = localStorage.getItem(PENSION_INFO_KEY);
@@ -644,6 +677,7 @@
       document.getElementById('editPensionTel').value = info.tel || '';
 
       document.getElementById('editHeroBg').value = info.heroBg || '';
+      document.getElementById('editHeroBgPreview').src = info.heroBg || '';
       document.getElementById('editHeroTitle').value = info.heroTitle || '';
       document.getElementById('editHeroSub').value = info.heroSub || '';
 
@@ -680,18 +714,22 @@
 
     function addGalleryImageField(url = '', cap = '') {
       const editGalleryContainer = document.getElementById('editGalleryContainer');
-      const count = editGalleryContainer.children.length + 1;
+      const count = Date.now() + Math.floor(Math.random() * 1000);
 
       const fieldDiv = document.createElement('div');
       fieldDiv.className = 'gallery-edit-item';
       fieldDiv.innerHTML = `
         <div class="form-sub-header">
-          <div class="form-sub-title">📷 사진 ${count}</div>
+          <div class="form-sub-title">📷 사진 항목</div>
           <button type="button" class="remove-img-item-btn" onclick="removeGalleryImageField(this)">&times;</button>
         </div>
         <div class="form-group">
-          <label>사진 URL</label>
-          <input type="text" class="input-gallery-url" value="${url}" placeholder="https://..." required>
+          <label>이미지 파일 선택</label>
+          <input type="file" accept="image/*" onchange="handleGalleryFileUpload(event, '${count}')">
+          <input type="hidden" class="input-gallery-url" id="gallery-url-input-${count}" value="${url}">
+          <div class="gallery-preview-box">
+            <img id="gallery-preview-${count}" src="${url || ''}" alt="미리보기">
+          </div>
         </div>
         <div class="form-group">
           <label>사진 설명 (캡션)</label>
@@ -761,7 +799,7 @@
       }
 
       closePensionEditModal();
-      alert('펜션 설정이 저장되었습니다.' + passMsg);
+      alert('펜션 설정 및 이미지 정보가 저장되었습니다.' + passMsg);
     }
 
     /* --- SUPABASE DATA & MAP HELPERS --- */
