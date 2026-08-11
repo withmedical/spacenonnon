@@ -9,22 +9,31 @@
   <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f44caba9969d8981c76497254ccb4b04&libraries=services"></script>
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js"></script>
 
+  <!-- Supabase JS Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // 전달해주신 Supabase 접속 정보 적용
+    const SUPABASE_URL = 'https://upyeqlaaglwkaudrztwa.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVweWVxbGFhZ2x3a2F1ZHJ6dHdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MTQ2NDgsImV4cCI6MjEwMTk5MDY0OH0.NDUIa0HsqevrqZz5Brv8gNV-JXB5Tk-r7x6TRi-LkFk';
+    
+    // Supabase 클라이언트 생성
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+
   <style>
-    /* 기본 스타일 초기화 */
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
     body { color: #333; line-height: 1.6; background-color: #f9f9f9; }
     a { text-decoration: none; color: inherit; }
 
-    /* 헤더 & 네비게이션 */
     header { background: #fff; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000; }
     .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 1rem; }
     .logo { font-size: 1.4rem; font-weight: bold; color: #ff6b35; cursor: pointer; }
     .nav-links { display: flex; gap: 1.2rem; list-style: none; align-items: center; }
-    .nav-links a:hover { color: #ff6b35; }
     .admin-nav-btn { background: #222; color: #fff; padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer; border: none; }
     .admin-nav-btn.active { background: #e63946; }
 
-    /* 히어로 섹션 */
     .hero { 
       background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80') center/cover; 
       color: #fff; text-align: center; padding: 4rem 1rem; transition: background 0.3s ease;
@@ -35,132 +44,68 @@
     .search-bar input { flex: 1; padding: 0.8rem; border: none; border-radius: 6px; font-size: 1rem; outline: none; }
     .search-bar button { padding: 0.8rem 1.2rem; background: #ff6b35; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-    /* 메인 컨테이너 */
     .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
     .section-title { font-size: 1.5rem; margin-bottom: 1rem; color: #222; }
 
-    /* 펜션 소개 섹션 스타일 */
-    .pension-section {
-      background: #fff; border-radius: 12px; padding: 2rem; margin-bottom: 2.5rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #ffe8df;
-    }
+    .pension-section { background: #fff; border-radius: 12px; padding: 2rem; margin-bottom: 2.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #ffe8df; }
     .pension-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
     .pension-badge { background: #ff6b35; color: #fff; font-size: 0.75rem; font-weight: bold; padding: 0.2rem 0.6rem; border-radius: 12px; display: inline-block; margin-bottom: 0.4rem; }
     .pension-title { font-size: 1.5rem; color: #222; }
     .pension-subtitle { color: #666; font-size: 0.95rem; margin-top: 0.2rem; }
     .pension-btn-group { display: flex; gap: 0.5rem; }
     .pension-info-btn { background: #333; color: #fff; border: none; padding: 0.7rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
-    .pension-info-btn:hover { background: #555; }
-    .pension-edit-btn { background: #e63946; color: #fff; border: none; padding: 0.7rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; display: none; }
 
-    /* 펜션 갤러리 그리드 레이아웃 */
     .pension-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .gallery-item { position: relative; border-radius: 8px; overflow: hidden; height: 180px; }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-    .gallery-item:hover img { transform: scale(1.05); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
     .gallery-item.main-img { grid-column: span 2; grid-row: span 2; height: 370px; }
     .img-caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: #fff; padding: 0.5rem; font-size: 0.85rem; text-align: center; }
 
-    /* 📢 펜션 소식/공지 섹션 */
     .notice-section { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .notice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
-    .add-notice-btn { background: #ff6b35; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: none; }
-    .add-notice-btn:hover { background: #e55a2b; }
     .notice-list { display: flex; flex-direction: column; gap: 0.6rem; }
-    .notice-item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; background: #fafafa; border: 1px solid #eee; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
-    .notice-item:hover { background: #fff5f0; border-color: #ffd8cc; }
-    .notice-item-left { display: flex; align-items: center; gap: 0.8rem; overflow: hidden; }
-    .notice-badge { background: #222; color: #fff; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; white-space: nowrap; font-weight: bold; }
-    .notice-badge.공지 { background: #ff6b35; }
-    .notice-badge.이벤트 { background: #e63946; }
-    .notice-badge.이용안내 { background: #457b9d; }
-    .notice-badge.여행꿀팁 { background: #2a9d8f; }
-    .notice-item-title { font-size: 0.95rem; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .notice-item-date { font-size: 0.8rem; color: #888; white-space: nowrap; }
+    .notice-item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; background: #fafafa; border: 1px solid #eee; border-radius: 8px; cursor: pointer; }
+    .notice-badge { background: #222; color: #fff; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold; }
 
-    /* 카테고리 퀵 메뉴 */
     .categories { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
     .category-btn { background: #fff; border: 1px solid #ddd; padding: 0.6rem 1.2rem; border-radius: 20px; white-space: nowrap; cursor: pointer; font-weight: 500; }
     .category-btn.active { background: #ff6b35; color: #fff; border-color: #ff6b35; }
 
-    /* 지도 섹션 */
     .map-section { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2.5rem; }
     .map-placeholder { width: 100%; height: 400px; background: #e5e3df; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666; font-weight: bold; }
 
-    /* 맛집 카드 리스트 Grid */
     .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-    .card { background: #fff; border-radius: 10px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
+    .card { background: #fff; border-radius: 10px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: transform 0.2s; }
     .card:hover { transform: translateY(-4px); border-color: #ff6b35; }
     .card-body { padding: 1.2rem; }
     .card-tag { display: inline-block; background: #fff0e6; color: #ff6b35; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; margin-bottom: 0.6rem; }
     .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.4rem; color: #222; }
-    .card-desc { font-size: 0.9rem; color: #555; margin-bottom: 1rem; line-height: 1.5; }
+    .card-desc { font-size: 0.9rem; color: #555; margin-bottom: 1rem; }
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 0.8rem; }
-    .card-actions { display: flex; gap: 0.4rem; }
-    .share-btn { background: none; border: 1px solid #ddd; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
-    .share-btn:hover { background: #f0f0f0; }
-    .delete-btn { background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: none; }
-    .delete-btn:hover { background: #ff4d4f; color: #fff; }
+    .delete-btn { background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; display: none; }
 
-    /* 관리자 전용 요소 제어 */
     .admin-only-btn { display: none; }
 
-    /* 모달 공통 스타일 */
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center; padding: 1rem;
-    }
-    .modal-content {
-      background: #fff; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-      border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); padding: 1.5rem; animation: fadeIn 0.3s ease-out;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; padding: 1rem; }
+    .modal-content { background: #fff; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 1.5rem; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1.2rem; }
-    .modal-header h2 { font-size: 1.25rem; color: #222; }
     .close-btn { background: none; border: none; font-size: 1.8rem; color: #888; cursor: pointer; }
-    .close-btn:hover { color: #000; }
     .form-group { margin-bottom: 1rem; text-align: left; }
-    .form-group label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 0.4rem; color: #444; }
-    .required { color: #ff6b35; }
-    .form-group input[type="text"], .form-group input[type="password"], .form-group select, .form-group textarea {
-      width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; outline: none;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #ff6b35; }
-
-    .form-sub-header { display: flex; justify-content: space-between; align-items: center; margin: 1.2rem 0 0.6rem 0; border-top: 1px dashed #eee; padding-top: 0.8rem; }
-    .form-sub-title { font-size: 0.95rem; font-weight: bold; color: #ff6b35; }
-    .remove-img-item-btn { background: none; border: none; color: #ff4d4f; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
-    .add-img-field-btn { width: 100%; background: #f0f0f0; border: 1px dashed #bbb; color: #444; padding: 0.6rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
-    .add-img-field-btn:hover { background: #e5e5e5; }
-
-    .category-edit-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
-    .category-edit-row input { flex: 1; }
+    .form-group label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 0.4rem; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; }
 
     .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee; }
-    .btn-cancel { padding: 0.7rem 1.2rem; background: #eee; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: #555; }
+    .btn-cancel { padding: 0.7rem 1.2rem; background: #eee; border: none; border-radius: 6px; cursor: pointer; }
     .btn-submit { padding: 0.7rem 1.2rem; background: #ff6b35; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .btn-submit:hover { background: #e55a2b; }
 
-    /* 푸터 */
     footer { background: #333; color: #ccc; text-align: center; padding: 2rem 1rem; margin-top: 4rem; font-size: 0.9rem; }
-
-    /* 모바일 반응형 처리 */
-    @media (max-width: 768px) {
-      .nav-links { gap: 0.8rem; font-size: 0.85rem; }
-      .hero h1 { font-size: 1.6rem; }
-      .pension-gallery { grid-template-columns: repeat(2, 1fr); }
-      .gallery-item.main-img { grid-column: span 2; grid-row: span 1; height: 220px; }
-      .gallery-item { height: 140px; }
-      .map-placeholder { height: 300px; }
-    }
   </style>
 </head>
 <body>
 
-  <!-- 1. 헤더 & 네비게이션 -->
   <header>
     <div class="nav-container">
-      <div class="logo" onclick="location.reload()" id="siteLogo">스페이스농농 🍊</div>
+      <div class="logo" onclick="location.reload()">스페이스농농 🍊</div>
       <ul class="nav-links">
         <li><a href="#pensionSection">🏡 펜션 소개</a></li>
         <li><a href="#noticeSection">📢 소식</a></li>
@@ -171,77 +116,95 @@
     </div>
   </header>
 
-  <!-- 2. 히어로 섹션 (메인 배너) -->
   <section class="hero" id="heroBanner">
-    <h1 id="heroTitle">제주 바다 앞 숙소 & 사장님 추천 맛집</h1>
-    <p id="heroSub">스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.</p>
+    <h1>제주 바다 앞 숙소 & 사장님 추천 맛집</h1>
+    <p>스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.</p>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="지역(예: 안덕면, 건입동), 음식점 이름, 음식 종류 검색" onkeyup="handleSearchKeyup(event)">
+      <input type="text" id="searchInput" placeholder="검색어 입력" onkeyup="handleSearchKeyup(event)">
       <button type="button" onclick="executeSearch()">검색</button>
     </div>
   </section>
 
   <div class="container">
-
-    <!-- 3. 펜션 소개 & 사진 갤러리 섹션 -->
     <section id="pensionSection" class="pension-section">
       <div class="pension-header">
         <div>
           <span class="pension-badge">HOST'S PICK</span>
-          <h2 class="pension-title" id="pensionTitleDisplay">🏡 스페이스농농에 오신 것을 환영합니다</h2>
-          <p class="pension-subtitle" id="pensionSubDisplay">제주 바다와 노을을 한눈에 담을 수 있는 감성 숙소입니다.</p>
-        </div>
-        <div class="pension-btn-group">
-          <button class="pension-edit-btn" id="pensionEditBtn" onclick="openPensionEditModal()">⚙️ 펜션 정보/사진 수정</button>
-          <button class="pension-info-btn" onclick="openPensionDetailModal()">숙소 상세 정보 & 예약 문의</button>
+          <h2 class="pension-title">🏡 스페이스농농에 오신 것을 환영합니다</h2>
+          <p class="pension-subtitle">제주 바다와 노을을 한눈에 담을 수 있는 감성 숙소입니다.</p>
         </div>
       </div>
-
-      <div class="pension-gallery" id="pensionGallery"></div>
-    </section>
-
-    <!-- 4. 📢 펜션 소식 & 공지사항 섹션 -->
-    <section id="noticeSection" class="notice-section">
-      <div class="notice-header">
-        <div>
-          <h2 class="section-title" style="margin-bottom:0.2rem;">📢 펜션 소식 & 이용 안내</h2>
-          <p style="font-size:0.9rem; color:#666;">체크인 안내, 이벤트, 사장님이 전하는 제주 여행 팁을 확인하세요.</p>
-        </div>
-        <button class="add-notice-btn" id="addNoticeBtn" onclick="openNoticeModal()">+ 새 글 작성 (관리자)</button>
+      <div class="pension-gallery" id="pensionGallery">
+        <div class="gallery-item main-img"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"><div class="img-caption">넓은 잔디밭과 오션뷰 전경</div></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=500&q=80"><div class="img-caption">아늑한 객실</div></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=500&q=80"><div class="img-caption">개별 테라스 바비큐장</div></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=80"><div class="img-caption">도보 거리 사계 해변</div></div>
       </div>
-      <div id="noticeList" class="notice-list"></div>
     </section>
 
-    <!-- 5. 지도 섹션 및 카테고리 필터 -->
     <section id="mapSection">
       <h2 class="section-title">제주 맛집 지도 탐색</h2>
-
-      <div class="categories" id="categoryContainer"></div>
-
+      <div class="categories" id="categoryContainer">
+        <button class="category-btn active" onclick="filterCategory(this, 'ALL')">전체</button>
+        <button class="category-btn" onclick="filterCategory(this, '흑돼지')">🐷 흑돼지</button>
+        <button class="category-btn" onclick="filterCategory(this, '해산물/회')">🐟 해산물/회</button>
+        <button class="category-btn" onclick="filterCategory(this, '카페/디저트')">☕ 카페/디저트</button>
+        <button class="category-btn" onclick="filterCategory(this, '도민맛집')">👍 도민맛집</button>
+      </div>
       <div class="map-section">
-        <div id="map" class="map-placeholder">
-          카카오 지도 API를 로딩 중입니다...
-        </div>
+        <div id="map" class="map-placeholder">카카오 지도 로딩 중...</div>
       </div>
     </section>
 
-    <!-- 6. 맛집 카드 리스트 섹션 -->
     <section style="margin-top:2.5rem;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2 class="section-title" style="margin-bottom:0;">추천 맛집 목록</h2>
-        <button class="btn-submit admin-only-btn" id="adminAddRestaurantBtn" onclick="openModal()" style="font-size:0.85rem; padding:0.5rem 1rem;">+ 맛집 등록 (관리자)</button>
+        <button class="btn-submit admin-only-btn" onclick="openModal()">+ 맛집 등록 (관리자)</button>
       </div>
       <div class="card-grid" id="cardGrid"></div>
     </section>
-
   </div>
 
-  <!-- 푸터 -->
   <footer>
-    <p>&copy; 2026 스페이스농농 & 제주 맛집 플랫폼. All rights reserved.</p>
+    <p>&copy; 2026 스페이스농농. All rights reserved.</p>
   </footer>
 
-  <!-- ==================== MODALS ==================== -->
+  <!-- 맛집 등록 모달 -->
+  <div id="placeModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>추천 맛집 등록하기 🍊 (Supabase)</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <form id="placeForm" onsubmit="handleFormSubmit(event)">
+        <div class="form-group">
+          <label>맛집 이름 *</label>
+          <input type="text" id="modalTitle" placeholder="예: 산지해장국" required>
+        </div>
+        <div class="form-group">
+          <label>카테고리 *</label>
+          <select id="modalCategory" required>
+            <option value="흑돼지">🐷 흑돼지</option>
+            <option value="해산물/회">🐟 해산물/회</option>
+            <option value="카페/디저트">☕ 카페/디저트</option>
+            <option value="도민맛집">👍 도민맛집</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>도로명 주소 *</label>
+          <input type="text" id="modalAddress" placeholder="예: 제주 서귀포시 안덕면 사계남로 182" required>
+        </div>
+        <div class="form-group">
+          <label>한줄 추천평</label>
+          <textarea id="modalDesc" rows="3" placeholder="다녀오신 후기나 추천 메뉴를 작성해 주세요."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" onclick="closeModal()">취소</button>
+          <button type="submit" class="btn-submit">등록하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- 관리자 로그인 모달 -->
   <div id="adminLoginModal" class="modal-overlay">
@@ -252,8 +215,8 @@
       </div>
       <form onsubmit="handleAdminLogin(event)">
         <div class="form-group">
-          <label for="adminPasswordInput">비밀번호 입력</label>
-          <input type="password" id="adminPasswordInput" placeholder="관리자 비밀번호를 입력하세요" required>
+          <label>비밀번호 입력</label>
+          <input type="password" id="adminPasswordInput" placeholder="기본 비밀번호: 1234" required>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-cancel" onclick="closeAdminLoginModal()">취소</button>
@@ -263,547 +226,82 @@
     </div>
   </div>
 
-  <!-- 펜션 정보 및 사진 수정 모달 (관리자 전용) -->
-  <div id="pensionEditModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>⚙️ 펜션 정보/사진 및 카테고리 설정</h2>
-        <button class="close-btn" onclick="closePensionEditModal()">&times;</button>
-      </div>
-      <form onsubmit="handlePensionEditSubmit(event)">
-        
-        <div class="form-sub-header" style="margin-top:0; border-top:none; padding-top:0;">
-          <div class="form-sub-title">🌄 메인 상단 배너 설정</div>
-        </div>
-        <div class="form-group">
-          <label>배너 배경 이미지 URL</label>
-          <input type="text" id="editHeroBg" required>
-        </div>
-        <div class="form-group">
-          <label>메인 큰 제목 문구</label>
-          <input type="text" id="editHeroTitle" required>
-        </div>
-        <div class="form-group">
-          <label>메인 서브 설명 문구</label>
-          <input type="text" id="editHeroSub" required>
-        </div>
-
-        <div class="form-sub-header">
-          <div class="form-sub-title">🏷️ 맛집 카테고리 관리</div>
-        </div>
-        <div id="editCategoryContainer"></div>
-        <button type="button" class="add-img-field-btn" onclick="addCategoryEditRow()">+ 카테고리 추가하기</button>
-
-        <div class="form-sub-header">
-          <div class="form-sub-title">🏡 펜션 기본 정보</div>
-        </div>
-        <div class="form-group">
-          <label>펜션 이름</label>
-          <input type="text" id="editPensionName" required>
-        </div>
-        <div class="form-group">
-          <label>한줄 소개글</label>
-          <input type="text" id="editPensionSub" required>
-        </div>
-        <div class="form-group">
-          <label>주소</label>
-          <input type="text" id="editPensionAddr" required>
-        </div>
-        <div class="form-group">
-          <label>문의 전화번호</label>
-          <input type="text" id="editPensionTel" required>
-        </div>
-
-        <div id="editGalleryContainer"></div>
-        <button type="button" class="add-img-field-btn" onclick="addGalleryImageField()">+ 사진 추가하기</button>
-
-        <div class="form-sub-header">
-          <div class="form-sub-title">🔑 관리자 비밀번호 변경</div>
-        </div>
-        <div class="form-group">
-          <label>새 비밀번호 (변경할 경우에만 입력)</label>
-          <input type="password" id="editAdminPassword" placeholder="기존 비밀번호 유지 시 빈칸">
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closePensionEditModal()">취소</button>
-          <button type="submit" class="btn-submit">저장하기</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 맛집 등록 모달 -->
-  <div id="placeModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>추천 맛집 등록하기 🍊 (관리자)</h2>
-        <button class="close-btn" onclick="closeModal()">&times;</button>
-      </div>
-      <form id="placeForm" onsubmit="handleFormSubmit(event)">
-        <div class="form-group">
-          <label for="modalTitle">맛집 이름 <span class="required">*</span></label>
-          <input type="text" id="modalTitle" placeholder="예: 산지해장국" required>
-        </div>
-        <div class="form-group">
-          <label for="modalCategory">카테고리 <span class="required">*</span></label>
-          <select id="modalCategory" required></select>
-        </div>
-        <div class="form-group">
-          <label for="modalAddress">도로명 주소 <span class="required">*</span></label>
-          <input type="text" id="modalAddress" placeholder="정확한 도로명 주소 입력 (예: 제주 제주시 건입동 1319-121)" required>
-        </div>
-        <div class="form-group">
-          <label for="modalDesc">한줄 추천평</label>
-          <textarea id="modalDesc" rows="3" placeholder="다녀오신 후기나 추천 메뉴를 작성해 주세요."></textarea>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closeModal()">취소</button>
-          <button type="submit" class="btn-submit">지도에 등록하기</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 펜션 상세 모달 -->
-  <div id="pensionModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>🏡 펜션 안내 & 예약 문의</h2>
-        <button class="close-btn" onclick="closePensionModal()">&times;</button>
-      </div>
-      <div style="line-height: 1.8; color: #444; font-size: 0.95rem;">
-        <p style="margin-bottom: 0.8rem;"><b>주소:</b> <span id="detailPensionAddr">제주특별자치도 서귀포시 안덕면 사계북로41번길 27-45</span></p>
-        <p style="margin-bottom: 0.8rem;"><b>체크인 / 체크아웃:</b> 15:00 / 11:00</p>
-        <p style="margin-bottom: 0.8rem;"><b>구비 시설:</b> 와이파이, 개별 바비큐, 전 객실 오션뷰, 주차장</p>
-        <p style="margin-bottom: 1.5rem;"><b>문의 전화:</b> <a href="tel:010-0000-0000" id="detailPensionTel" style="color:#ff6b35; font-weight:bold;">010-XXXX-XXXX</a></p>
-        <div style="text-align: center;">
-          <a href="https://naver.me" target="_blank" style="display:inline-block; background:#03cf5d; color:#fff; padding:0.7rem 1.5rem; border-radius:6px; font-weight:bold;">네이버 예약 바로가기</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 펜션 소식 작성 모달 -->
-  <div id="noticeWriteModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>📢 소식/공지 작성하기 (관리자)</h2>
-        <button class="close-btn" onclick="closeNoticeModal()">&times;</button>
-      </div>
-      <form id="noticeForm" onsubmit="handleNoticeSubmit(event)">
-        <div class="form-group">
-          <label for="noticeCategory">구분</label>
-          <select id="noticeCategory" required>
-            <option value="공지">📢 공지사항</option>
-            <option value="이벤트">🎉 이벤트</option>
-            <option value="이용안내">ℹ️ 이용안내</option>
-            <option value="여행꿀팁">💡 여행꿀팁</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="noticeTitle">제목 <span class="required">*</span></label>
-          <input type="text" id="noticeTitle" placeholder="예: 바비큐장 이용 시간 및 예약 안내" required>
-        </div>
-        <div class="form-group">
-          <label for="noticeContent">내용 <span class="required">*</span></label>
-          <textarea id="noticeContent" rows="6" placeholder="게시할 상세 내용을 입력하세요." required></textarea>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closeNoticeModal()">취소</button>
-          <button type="submit" class="btn-submit">등록하기</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 펜션 소식 상세 모달 -->
-  <div id="noticeDetailModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div>
-          <span id="detailBadge" class="notice-badge">공지</span>
-          <h2 id="detailTitle" style="display:inline-block; margin-left:0.3rem;">게시글 제목</h2>
-        </div>
-        <button class="close-btn" onclick="closeNoticeDetailModal()">&times;</button>
-      </div>
-      <div style="font-size:0.85rem; color:#888; margin-bottom:1rem; border-bottom:1px solid #f0f0f0; padding-bottom:0.5rem;">
-        작성일: <span id="detailDate">2026-08-07</span>
-      </div>
-      <div id="detailContent" style="line-height:1.7; color:#333; white-space:pre-line; min-height:120px;"></div>
-      <div class="modal-footer" style="justify-content: space-between;">
-        <button type="button" id="deleteNoticeBtn" class="delete-btn" style="display:none;">삭제하기 (관리자)</button>
-        <button type="button" class="btn-cancel" onclick="closeNoticeDetailModal()">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== JAVASCRIPT ==================== -->
   <script>
-    // 카카오 SDK 초기화
-    if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
-      Kakao.init('f44caba9969d8981c76497254ccb4b04');
-    }
-
-    // LOCAL STORAGE KEYS
-    const ADMIN_PASS_KEY = 'pension_admin_password';
-    const RESTAURANT_STORAGE_KEY = 'jeju_restaurant_list';
-    const NOTICE_STORAGE_KEY = 'pension_notice_list';
-    const PENSION_INFO_KEY = 'pension_info_data';
-
-    function getAdminPassword() {
-      return localStorage.getItem(ADMIN_PASS_KEY) || '1234';
-    }
-
     let isAdmin = false;
-
-    const DEFAULT_CATEGORIES = [
-      { name: '흑돼지', icon: '🐷' },
-      { name: '해산물/회', icon: '🐟' },
-      { name: '카페/디저트', icon: '☕' },
-      { name: '국수/고기국수', icon: '🍜' },
-      { name: '도민맛집', icon: '👍' }
-    ];
-
-    const DEFAULT_PENSION = {
-      name: "🏡 스페이스농농",
-      sub: "제주 바다와 노을을 한눈에 담을 수 있는 감성 숙소입니다.",
-      address: "제주특별자치도 서귀포시 안덕면 사계북로41번길 27-45",
-      tel: "010-XXXX-XXXX",
-      heroBg: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80",
-      heroTitle: "제주 바다 앞 숙소 & 사장님 추천 맛집",
-      heroSub: "스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.",
-      categories: DEFAULT_CATEGORIES,
-      gallery: [
-        { url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80", cap: "넓은 잔디밭과 오션뷰 전경" },
-        { url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=500&q=80", cap: "아늑한 101호 객실" },
-        { url: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=500&q=80", cap: "개별 테라스 바비큐장" },
-        { url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=80", cap: "도보 3분 거리 애월 해변" }
-      ]
-    };
-
     let map = null;
-    let pensionMarker = null;
-    let pensionInfoWindow = null;
     const activeMarkers = {};
     let currentCategory = 'ALL';
     let searchKeyword = '';
 
-    /* 📌 [방법 2 적용] 소스 코드에 고정 저장할 기본 추천 맛집 데이터 배열 */
-    /* 사장님께서 고정하고 싶으신 맛집들을 아래 항목 형태로 자유롭게 추가하시면 됩니다. */
-    const DEFAULT_RESTAURANTS = [
-      {
-        id: 'rest_1',
-        title: '산지해장국',
-        category: '도민맛집',
-        address: '제주특별자치도 제주시 건입동 1319-121',
-        desc: '도민들이 즐겨찾는 푸짐하고 얼큰한 해장국 맛집입니다.',
-        lat: 33.5140,
-        lng: 126.5280
-      },
-      {
-        id: 'rest_2',
-        title: '안덕 사계 오션뷰 흑돼지',
-        category: '흑돼지',
-        address: '제주특별자치도 서귀포시 안덕면 사계남로 182',
-        desc: '사계 해변을 보며 즐기는 오션뷰 흑돼지 구이입니다.',
-        lat: 33.2320,
-        lng: 126.3110
-      }
-    ];
+    // 1. Supabase에서 맛집 목록 불러오기
+    async function fetchRestaurantsFromSupabase() {
+      const { data, error } = await supabaseClient
+        .from('restaurants')
+        .select('*')
+        .order('id', { ascending: false });
 
-    const DEFAULT_NOTICES = [
-      {
-        id: 'notice_1',
-        category: '공지',
-        title: '🏡 스페이스농농 이용 수칙 및 입퇴실 안내',
-        content: '안녕하세요 사장입니다!\n\n1. 체크인: 오후 3시 / 체크아웃: 오전 11시\n2. 객실 내 육류/생선 구이는 금지되어 있으니 개별 바비큐장을 이용해 주세요.\n3. 밤 10시 이후에는 타 객실을 위해 정숙 부탁드립니다.',
-        date: '2026-08-01'
+      if (error) {
+        console.error('Data Fetch Error:', error);
+        return [];
       }
-    ];
+      return data || [];
+    }
 
-    /* --- ADMIN AUTH HANDLERS --- */
-    function toggleAdminAuth() {
-      if (isAdmin) {
-        isAdmin = false;
-        updateAdminUI();
-        renderFilteredView(false);
-        alert('관리자 모드에서 로그아웃되었습니다.');
-      } else {
-        document.getElementById('adminLoginModal').style.display = 'flex';
+    // 2. Supabase에 신규 맛집 저장하기
+    async function processRegistration(data) {
+      if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.addressSearch(data.address, async function (result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+            data.lat = parseFloat(result[0].y);
+            data.lng = parseFloat(result[0].x);
+
+            const { error } = await supabaseClient
+              .from('restaurants')
+              .insert([data]);
+
+            if (error) {
+              alert('Supabase 저장 실패: ' + error.message);
+            } else {
+              alert(`'${data.title}' 맛집이 영구 저장되었습니다!`);
+              closeModal();
+              renderFilteredView(false);
+            }
+          } else {
+            alert('입력하신 주소를 찾을 수 없습니다. 도로명 주소를 정확히 입력해 주세요.');
+          }
+        });
       }
     }
 
-    function closeAdminLoginModal() {
-      document.getElementById('adminLoginModal').style.display = 'none';
-      document.getElementById('adminPasswordInput').value = '';
-    }
-
-    function handleAdminLogin(e) {
-      e.preventDefault();
-      const inputPass = document.getElementById('adminPasswordInput').value;
-      if (inputPass === getAdminPassword()) {
-        isAdmin = true;
-        updateAdminUI();
-        renderFilteredView(false);
-        closeAdminLoginModal();
-        alert('관리자로 인증되었습니다. (맛집 등록/수정/삭제 권한 부여)');
-      } else {
-        alert('비밀번호가 올바르지 않습니다.');
-      }
-    }
-
-    function updateAdminUI() {
-      const btn = document.getElementById('adminAuthBtn');
-      const editBtn = document.getElementById('pensionEditBtn');
-      const addNoticeBtn = document.getElementById('addNoticeBtn');
-      const adminOnlyBtns = document.querySelectorAll('.admin-only-btn');
-
-      if (isAdmin) {
-        btn.innerText = '🔓 관리자 로그아웃';
-        btn.classList.add('active');
-        editBtn.style.display = 'inline-block';
-        addNoticeBtn.style.display = 'inline-block';
-        adminOnlyBtns.forEach(b => b.style.display = 'inline-block');
-      } else {
-        btn.innerText = '🔒 관리자 로그인';
-        btn.classList.remove('active');
-        editBtn.style.display = 'none';
-        addNoticeBtn.style.display = 'none';
-        adminOnlyBtns.forEach(b => b.style.display = 'none');
-      }
-    }
-
-    /* --- PENSION INFO & CATEGORY MANAGEMENT --- */
-    function getPensionInfo() {
-      const saved = localStorage.getItem(PENSION_INFO_KEY);
-      const data = saved ? JSON.parse(saved) : DEFAULT_PENSION;
-      if (!data.categories) data.categories = DEFAULT_CATEGORIES;
-      return data;
-    }
-
-    function renderPensionInfo() {
-      const info = getPensionInfo();
-      document.getElementById('siteLogo').innerText = (info.name || '스페이스농농') + ' 🍊';
-      document.getElementById('pensionTitleDisplay').innerText = info.name;
-      document.getElementById('pensionSubDisplay').innerText = info.sub;
-      document.getElementById('detailPensionAddr').innerText = info.address;
-      document.getElementById('detailPensionTel').innerText = info.tel;
-      document.getElementById('detailPensionTel').href = `tel:${info.tel}`;
-
-      const heroBanner = document.getElementById('heroBanner');
-      if (info.heroBg) {
-        heroBanner.style.background = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${info.heroBg}') center/cover`;
-      }
-      if (info.heroTitle) document.getElementById('heroTitle').innerText = info.heroTitle;
-      if (info.heroSub) document.getElementById('heroSub').innerText = info.heroSub;
-
-      renderCategoriesUI(info.categories);
-      renderModalCategoryOptions(info.categories);
-
-      const galleryContainer = document.getElementById('pensionGallery');
-      galleryContainer.innerHTML = '';
-      const galleryList = info.gallery || [];
-      galleryList.forEach((item, index) => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = `gallery-item ${index === 0 ? 'main-img' : ''}`;
-        itemDiv.innerHTML = `
-          <img src="${item.url}" alt="${item.cap || '펜션 사진'}">
-          <div class="img-caption">${item.cap || ''}</div>
-        `;
-        galleryContainer.appendChild(itemDiv);
-      });
-    }
-
-    function renderCategoriesUI(catList) {
-      const container = document.getElementById('categoryContainer');
-      if (!container) return;
-      container.innerHTML = '';
-
-      const allBtn = document.createElement('button');
-      allBtn.className = `category-btn ${currentCategory === 'ALL' ? 'active' : ''}`;
-      allBtn.onclick = function() { filterCategory(this, 'ALL'); };
-      allBtn.innerText = '전체';
-      container.appendChild(allBtn);
-
-      catList.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `category-btn ${currentCategory === cat.name ? 'active' : ''}`;
-        btn.onclick = function() { filterCategory(this, cat.name); };
-        btn.innerText = `${cat.icon || ''} ${cat.name}`.trim();
-        container.appendChild(btn);
-      });
-    }
-
-    function renderModalCategoryOptions(catList) {
-      const select = document.getElementById('modalCategory');
-      if (!select) return;
-      select.innerHTML = '<option value="" disabled selected>카테고리를 선택하세요</option>';
-      catList.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat.name;
-        opt.innerText = `${cat.icon || ''} ${cat.name}`.trim();
-        select.appendChild(opt);
-      });
-      const optEtc = document.createElement('option');
-      optEtc.value = '기타';
-      optEtc.innerText = '✨ 기타';
-      select.appendChild(optEtc);
-    }
-
-    function openPensionEditModal() {
+    // 3. Supabase 맛집 삭제하기
+    async function deleteRestaurant(id) {
       if (!isAdmin) return;
-      const info = getPensionInfo();
-      document.getElementById('editPensionName').value = info.name || '';
-      document.getElementById('editPensionSub').value = info.sub || '';
-      document.getElementById('editPensionAddr').value = info.address || '';
-      document.getElementById('editPensionTel').value = info.tel || '';
+      if (!confirm('정말 이 맛집을 삭제하시겠습니까?')) return;
 
-      document.getElementById('editHeroBg').value = info.heroBg || '';
-      document.getElementById('editHeroTitle').value = info.heroTitle || '';
-      document.getElementById('editHeroSub').value = info.heroSub || '';
+      const { error } = await supabaseClient
+        .from('restaurants')
+        .delete()
+        .eq('id', id);
 
-      const editCategoryContainer = document.getElementById('editCategoryContainer');
-      editCategoryContainer.innerHTML = '';
-      const catList = info.categories || DEFAULT_CATEGORIES;
-      catList.forEach(cat => { addCategoryEditRow(cat.icon, cat.name); });
-
-      const editGalleryContainer = document.getElementById('editGalleryContainer');
-      editGalleryContainer.innerHTML = '';
-      const galleryList = info.gallery || [];
-      galleryList.forEach((item) => { addGalleryImageField(item.url, item.cap); });
-
-      document.getElementById('editAdminPassword').value = '';
-      document.getElementById('pensionEditModal').style.display = 'flex';
-    }
-
-    function addCategoryEditRow(icon = '', name = '') {
-      const container = document.getElementById('editCategoryContainer');
-      const row = document.createElement('div');
-      row.className = 'category-edit-row';
-      row.innerHTML = `
-        <input type="text" class="input-cat-icon" value="${icon}" placeholder="아이콘" style="width: 70px;">
-        <input type="text" class="input-cat-name" value="${name}" placeholder="카테고리명" required>
-        <button type="button" class="remove-img-item-btn" onclick="removeCategoryEditRow(this)">&times;</button>
-      `;
-      container.appendChild(row);
-    }
-
-    function removeCategoryEditRow(btn) {
-      const row = btn.closest('.category-edit-row');
-      if (row) row.remove();
-    }
-
-    function addGalleryImageField(url = '', cap = '') {
-      const editGalleryContainer = document.getElementById('editGalleryContainer');
-      const count = editGalleryContainer.children.length + 1;
-
-      const fieldDiv = document.createElement('div');
-      fieldDiv.className = 'gallery-edit-item';
-      fieldDiv.innerHTML = `
-        <div class="form-sub-header">
-          <div class="form-sub-title">📷 사진 ${count}</div>
-          <button type="button" class="remove-img-item-btn" onclick="removeGalleryImageField(this)">&times;</button>
-        </div>
-        <div class="form-group">
-          <label>사진 URL</label>
-          <input type="text" class="input-gallery-url" value="${url}" placeholder="https://..." required>
-        </div>
-        <div class="form-group">
-          <label>사진 설명 (캡션)</label>
-          <input type="text" class="input-gallery-cap" value="${cap}" placeholder="예: 오션뷰 객실 전경" required>
-        </div>
-      `;
-      editGalleryContainer.appendChild(fieldDiv);
-    }
-
-    function removeGalleryImageField(btn) {
-      const item = btn.closest('.gallery-edit-item');
-      if (item) item.remove();
-    }
-
-    function closePensionEditModal() {
-      document.getElementById('pensionEditModal').style.display = 'none';
-    }
-
-    function handlePensionEditSubmit(e) {
-      e.preventDefault();
-      const currentInfo = getPensionInfo();
-
-      const iconInputs = document.querySelectorAll('.input-cat-icon');
-      const nameInputs = document.querySelectorAll('.input-cat-name');
-      const newCategories = [];
-      nameInputs.forEach((nameInput, idx) => {
-        const nameVal = nameInput.value.trim();
-        const iconVal = iconInputs[idx] ? iconInputs[idx].value.trim() : '';
-        if (nameVal) newCategories.push({ icon: iconVal, name: nameVal });
-      });
-
-      const urlInputs = document.querySelectorAll('.input-gallery-url');
-      const capInputs = document.querySelectorAll('.input-gallery-cap');
-      const newGallery = [];
-      urlInputs.forEach((urlInput, index) => {
-        const u = urlInput.value.trim();
-        const c = capInputs[index] ? capInputs[index].value.trim() : '';
-        if (u) newGallery.push({ url: u, cap: c });
-      });
-
-      const updated = {
-        ...currentInfo,
-        name: document.getElementById('editPensionName').value,
-        sub: document.getElementById('editPensionSub').value,
-        address: document.getElementById('editPensionAddr').value,
-        tel: document.getElementById('editPensionTel').value,
-        heroBg: document.getElementById('editHeroBg').value,
-        heroTitle: document.getElementById('editHeroTitle').value,
-        heroSub: document.getElementById('editHeroSub').value,
-        categories: newCategories,
-        gallery: newGallery
-      };
-
-      const newPass = document.getElementById('editAdminPassword').value.trim();
-      let passMsg = '';
-      if (newPass !== '') {
-        localStorage.setItem(ADMIN_PASS_KEY, newPass);
-        passMsg = ' (비밀번호 변경 완료)';
-      }
-
-      localStorage.setItem(PENSION_INFO_KEY, JSON.stringify(updated));
-      renderPensionInfo();
-      if (typeof kakao !== 'undefined' && kakao.maps && map) {
-        initKakaoMap();
+      if (error) {
+        alert('삭제 실패: ' + error.message);
       } else {
+        alert('맛집이 삭제되었습니다.');
         renderFilteredView(false);
       }
-
-      closePensionEditModal();
-      alert('설정이 저장되었습니다.' + passMsg);
     }
 
-    /* --- RESTAURANT & MAP HELPERS --- */
-    function getSavedRestaurants() {
-      const saved = localStorage.getItem(RESTAURANT_STORAGE_KEY);
-      if (!saved) {
-        localStorage.setItem(RESTAURANT_STORAGE_KEY, JSON.stringify(DEFAULT_RESTAURANTS));
-        return DEFAULT_RESTAURANTS;
-      }
-      return JSON.parse(saved);
-    }
-
-    function saveAllRestaurants(list) {
-      localStorage.setItem(RESTAURANT_STORAGE_KEY, JSON.stringify(list));
-    }
-
+    // 4. 지도 초기화 (스페이스농농 숙소 주소 기준)
     function initKakaoMap() {
       const mapContainer = document.getElementById('map');
       if (!mapContainer) return;
-      mapContainer.innerHTML = '';
 
-      const pensionInfo = getPensionInfo();
+      const pensionAddress = "제주특별자치도 서귀포시 안덕면 사계북로41번길 27-45";
 
       if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
         const geocoder = new kakao.maps.services.Geocoder();
-        geocoder.addressSearch(pensionInfo.address, function(result, status) {
+        geocoder.addressSearch(pensionAddress, function(result, status) {
           let coords;
           if (status === kakao.maps.services.Status.OK) {
             coords = new kakao.maps.LatLng(result[0].y, result[0].x);
@@ -814,87 +312,21 @@
           map = new kakao.maps.Map(mapContainer, { center: coords, level: 7 });
           map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
 
-          renderPensionMarker(coords, pensionInfo.name, pensionInfo.address);
+          // 숙소 마커 생성
+          const marker = new kakao.maps.Marker({ position: coords, map: map, zIndex: 100 });
+          const infowindow = new kakao.maps.InfoWindow({
+            content: `<div style="padding:10px; width:190px; font-size:12px;"><b>🏡 스페이스농농</b><br><span style="color:#666;">${pensionAddress}</span></div>`
+          });
+          infowindow.open(map, marker);
+
           renderFilteredView(true);
         });
       }
     }
 
-    function renderPensionMarker(coords, name, address) {
-      pensionMarker = new kakao.maps.Marker({ position: coords, map: map, zIndex: 100 });
-      const content = `
-        <div style="padding:10px; width:200px; font-size:12px; line-height:1.4;">
-          <span style="background:#ff6b35; color:#fff; padding:2px 5px; border-radius:3px; font-size:10px; font-weight:bold;">숙소 위치</span><br>
-          <b style="font-size:13px; color:#222; display:inline-block; margin-top:3px;">${name}</b><br>
-          <span style="color:#666; font-size:11px;">${address}</span>
-        </div>
-      `;
-      pensionInfoWindow = new kakao.maps.InfoWindow({ content: content });
-      pensionInfoWindow.open(map, pensionMarker);
-
-      kakao.maps.event.addListener(pensionMarker, 'click', function () {
-        pensionInfoWindow.open(map, pensionMarker);
-      });
-    }
-
-    function addMarkerToMap(id, lat, lng, title, category, desc) {
-      if (!map) return;
-      const coords = new kakao.maps.LatLng(lat, lng);
-      const marker = new kakao.maps.Marker({ map: map, position: coords });
-
-      const infowindow = new kakao.maps.InfoWindow({
-        content: `
-          <div style="padding:10px; width:180px; font-size:12px; line-height:1.4;">
-            <strong style="color:#ff6b35;">[${category}]</strong><br>
-            <b style="font-size:13px;">${title}</b><br>
-            <span style="color:#666;">${desc || ''}</span>
-          </div>
-        `,
-        removable: true
-      });
-
-      activeMarkers[id] = { marker: marker, infowindow: infowindow, coords: coords };
-
-      kakao.maps.event.addListener(marker, 'click', function () {
-        infowindow.open(map, marker);
-      });
-
-      return coords;
-    }
-
-    function focusRestaurantOnMap(id) {
-      if (!map || !activeMarkers[id]) return;
-
-      const target = activeMarkers[id];
-      map.panTo(target.coords);
-      target.infowindow.open(map, target.marker);
-
-      const mapElem = document.getElementById('mapSection');
-      if (mapElem) {
-        mapElem.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-
-    /* --- FILTER & RENDER VIEW --- */
-    function filterCategory(btn, category) {
-      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentCategory = category;
-      renderFilteredView(false);
-    }
-
-    function handleSearchKeyup(e) {
-      if (e.key === 'Enter') executeSearch();
-    }
-
-    function executeSearch() {
-      const input = document.getElementById('searchInput');
-      searchKeyword = input ? input.value.trim().toLowerCase() : '';
-      renderFilteredView(false);
-    }
-
-    function renderFilteredView(isInitial = false) {
-      const allList = getSavedRestaurants();
+    // 5. 맛집 목록 및 마커 렌더링
+    async function renderFilteredView(isInitial = false) {
+      const allList = await fetchRestaurantsFromSupabase();
       const cardGrid = document.getElementById('cardGrid');
       if (cardGrid) cardGrid.innerHTML = '';
 
@@ -917,30 +349,22 @@
         return matchesCategory && matchesKeyword;
       });
 
-      let bounds;
-      if (typeof kakao !== 'undefined' && kakao.maps && map && !isInitial) {
-        bounds = new kakao.maps.LatLngBounds();
-      }
-
       if (filtered.length === 0 && cardGrid) {
-        cardGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: #888;">
-            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">🔍 일치하는 맛집이 없습니다.</p>
-            <p style="font-size: 0.95rem;">다른 검색어를 입력하시거나 카테고리를 변경해 보세요.</p>
-          </div>
-        `;
+        cardGrid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: #888;">🔍 일치하는 맛집이 없습니다.</div>`;
       } else {
         filtered.forEach(data => {
           appendCardToList(data);
           if (data.lat && data.lng && typeof kakao !== 'undefined' && kakao.maps && map) {
-            const coords = addMarkerToMap(data.id, data.lat, data.lng, data.title, data.category, data.desc);
-            if (bounds && coords) bounds.extend(coords);
+            const coords = new kakao.maps.LatLng(data.lat, data.lng);
+            const marker = new kakao.maps.Marker({ map: map, position: coords });
+            const infowindow = new kakao.maps.InfoWindow({
+              content: `<div style="padding:10px; width:180px; font-size:12px;"><strong style="color:#ff6b35;">[${data.category}]</strong><br><b>${data.title}</b><br><span style="color:#666;">${data.desc || ''}</span></div>`
+            });
+
+            activeMarkers[data.id] = { marker, infowindow, coords };
+            kakao.maps.event.addListener(marker, 'click', () => infowindow.open(map, marker));
           }
         });
-      }
-
-      if (!isInitial && filtered.length > 0 && bounds && !bounds.isEmpty()) {
-        map.setBounds(bounds);
       }
     }
 
@@ -950,17 +374,14 @@
 
       const newCard = document.createElement('article');
       newCard.className = 'card';
-      newCard.id = `card-${data.id}`;
-
-      newCard.onclick = function(e) {
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-        focusRestaurantOnMap(data.id);
+      newCard.onclick = (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        if (activeMarkers[data.id]) {
+          map.panTo(activeMarkers[data.id].coords);
+          activeMarkers[data.id].infowindow.open(map, activeMarkers[data.id].marker);
+          document.getElementById('mapSection').scrollIntoView({ behavior: 'smooth' });
+        }
       };
-
-      const safeTitle = (data.title || '').replace(/'/g, "\\'");
-      const safeCategory = (data.category || '').replace(/'/g, "\\'");
-      const safeDesc = (data.desc || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
-      const safeAddress = (data.address || '').replace(/'/g, "\\'");
 
       const deleteBtnStyle = isAdmin ? 'display: inline-block;' : 'display: none;';
 
@@ -971,234 +392,61 @@
           <p class="card-desc">${data.desc || '작성된 추천평이 없습니다.'}</p>
           <div class="card-footer">
             <span style="font-size: 0.8rem; color: #888;">📍 ${data.address}</span>
-            <div class="card-actions">
-              <button class="share-btn" onclick="shareToKakao('${safeTitle}', '${safeCategory}', '${safeDesc}', '${safeAddress}')">💬 공유</button>
-              <button class="delete-btn" style="${deleteBtnStyle}" onclick="deleteRestaurant('${data.id}')">삭제</button>
-            </div>
+            <button class="delete-btn" style="${deleteBtnStyle}" onclick="deleteRestaurant('${data.id}')">삭제</button>
           </div>
         </div>
       `;
       cardGrid.prepend(newCard);
     }
 
-    function deleteRestaurant(id) {
-      if (!isAdmin) {
-        alert('관리자 로그인 후 삭제할 수 있습니다.');
-        return;
-      }
-      if (!confirm('정말 이 맛집을 삭제하시겠습니까?')) return;
-      const list = getSavedRestaurants().filter(item => item.id !== id);
-      saveAllRestaurants(list);
+    function filterCategory(btn, category) {
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = category;
       renderFilteredView(false);
-      alert('맛집이 삭제되었습니다.');
     }
 
-    /* --- MODAL FORM SUBMIT --- */
-    function openModal() {
-      if (!isAdmin) {
-        alert('관리자 로그인 후 맛집을 등록할 수 있습니다.');
-        return;
-      }
-      document.getElementById('placeModal').style.display = 'flex';
+    function handleSearchKeyup(e) { if (e.key === 'Enter') executeSearch(); }
+    function executeSearch() {
+      const input = document.getElementById('searchInput');
+      searchKeyword = input ? input.value.trim().toLowerCase() : '';
+      renderFilteredView(false);
     }
 
-    function closeModal() {
-      document.getElementById('placeModal').style.display = 'none';
-      document.getElementById('placeForm').reset();
+    /* --- 관리자 모달 제어 --- */
+    function toggleAdminAuth() {
+      if (isAdmin) { isAdmin = false; updateAdminUI(); } 
+      else { document.getElementById('adminLoginModal').style.display = 'flex'; }
     }
-
+    function closeAdminLoginModal() { document.getElementById('adminLoginModal').style.display = 'none'; }
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      if (document.getElementById('adminPasswordInput').value === '1234') {
+        isAdmin = true;
+        updateAdminUI();
+        closeAdminLoginModal();
+        alert('관리자로 로그인되었습니다.');
+      } else { alert('비밀번호가 올바르지 않습니다.'); }
+    }
+    function updateAdminUI() {
+      document.querySelectorAll('.admin-only-btn').forEach(b => b.style.display = isAdmin ? 'inline-block' : 'none');
+      document.querySelectorAll('.delete-btn').forEach(b => b.style.display = isAdmin ? 'inline-block' : 'none');
+    }
+    function openModal() { document.getElementById('placeModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('placeModal').style.display = 'none'; document.getElementById('placeForm').reset(); }
     function handleFormSubmit(e) {
       e.preventDefault();
-      if (!isAdmin) return;
-
-      const title = document.getElementById('modalTitle').value;
-      const category = document.getElementById('modalCategory').value;
-      const address = document.getElementById('modalAddress').value;
-      const desc = document.getElementById('modalDesc').value;
-
-      processRegistration({ title, category, address, desc });
-    }
-
-    function processRegistration(data) {
-      data.id = 'rest_' + Date.now();
-
-      if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-        const geocoder = new kakao.maps.services.Geocoder();
-        geocoder.addressSearch(data.address, function (result, status) {
-          if (status === kakao.maps.services.Status.OK) {
-            data.lat = result[0].y;
-            data.lng = result[0].x;
-
-            const list = getSavedRestaurants();
-            list.unshift(data);
-            saveAllRestaurants(list);
-
-            renderFilteredView(false);
-            map.setCenter(new kakao.maps.LatLng(data.lat, data.lng));
-            map.setLevel(4);
-
-            alert(`'${data.title}' 맛집이 정상 등록 및 저장되었습니다!`);
-            closeModal();
-          } else {
-            alert('입력하신 주소를 찾을 수 없습니다. 도로명 주소를 정확히 입력해 주세요.');
-          }
-        });
-      } else {
-        const list = getSavedRestaurants();
-        list.unshift(data);
-        saveAllRestaurants(list);
-        renderFilteredView(false);
-        alert(`'${data.title}' 맛집이 등록되었습니다!`);
-        closeModal();
-      }
-    }
-
-    /* --- PENSION & NOTICE MODAL HANDLERS --- */
-    function openPensionDetailModal() { document.getElementById('pensionModal').style.display = 'flex'; }
-    function closePensionModal() { document.getElementById('pensionModal').style.display = 'none'; }
-
-    function openNoticeModal() {
-      if (!isAdmin) {
-        alert('관리자 로그인 후 작성 가능합니다.');
-        return;
-      }
-      document.getElementById('noticeWriteModal').style.display = 'flex';
-    }
-    function closeNoticeModal() {
-      document.getElementById('noticeWriteModal').style.display = 'none';
-      document.getElementById('noticeForm').reset();
-    }
-
-    function getSavedNotices() {
-      const saved = localStorage.getItem(NOTICE_STORAGE_KEY);
-      if (!saved) {
-        localStorage.setItem(NOTICE_STORAGE_KEY, JSON.stringify(DEFAULT_NOTICES));
-        return DEFAULT_NOTICES;
-      }
-      return JSON.parse(saved);
-    }
-
-    function renderNoticeList() {
-      const container = document.getElementById('noticeList');
-      if (!container) return;
-      const notices = getSavedNotices();
-      container.innerHTML = '';
-
-      if (notices.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#888; padding:1.5rem;">등록된 소식이 없습니다.</p>';
-        return;
-      }
-
-      notices.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'notice-item';
-        div.onclick = () => openNoticeDetailModal(item.id);
-        div.innerHTML = `
-          <div class="notice-item-left">
-            <span class="notice-badge ${item.category}">${item.category}</span>
-            <span class="notice-item-title">${item.title}</span>
-          </div>
-          <span class="notice-item-date">${item.date}</span>
-        `;
-        container.appendChild(div);
+      processRegistration({
+        title: document.getElementById('modalTitle').value,
+        category: document.getElementById('modalCategory').value,
+        address: document.getElementById('modalAddress').value,
+        desc: document.getElementById('modalDesc').value
       });
     }
 
-    function handleNoticeSubmit(e) {
-      e.preventDefault();
-      if (!isAdmin) return;
-
-      const category = document.getElementById('noticeCategory').value;
-      const title = document.getElementById('noticeTitle').value;
-      const content = document.getElementById('noticeContent').value;
-      const today = new Date();
-      const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-      const newNotice = { id: 'notice_' + Date.now(), category, title, content, date: dateStr };
-      const notices = getSavedNotices();
-      notices.unshift(newNotice);
-      localStorage.setItem(NOTICE_STORAGE_KEY, JSON.stringify(notices));
-
-      renderNoticeList();
-      closeNoticeModal();
-      alert('새 소식이 등록되었습니다.');
-    }
-
-    function openNoticeDetailModal(id) {
-      const notices = getSavedNotices();
-      const notice = notices.find(item => item.id === id);
-      if (!notice) return;
-
-      document.getElementById('detailBadge').innerText = notice.category;
-      document.getElementById('detailBadge').className = `notice-badge ${notice.category}`;
-      document.getElementById('detailTitle').innerText = notice.title;
-      document.getElementById('detailDate').innerText = notice.date;
-      document.getElementById('detailContent').innerText = notice.content;
-
-      const deleteBtn = document.getElementById('deleteNoticeBtn');
-      if (isAdmin) {
-        deleteBtn.style.display = 'inline-block';
-        deleteBtn.onclick = () => deleteNotice(notice.id);
-      } else {
-        deleteBtn.style.display = 'none';
-      }
-
-      document.getElementById('noticeDetailModal').style.display = 'flex';
-    }
-
-    function closeNoticeDetailModal() { document.getElementById('noticeDetailModal').style.display = 'none'; }
-
-    function deleteNotice(id) {
-      if (!isAdmin) return;
-      if (!confirm('이 게시글을 삭제하시겠습니까?')) return;
-      const notices = getSavedNotices();
-      const updated = notices.filter(item => item.id !== id);
-      localStorage.setItem(NOTICE_STORAGE_KEY, JSON.stringify(updated));
-      renderNoticeList();
-      closeNoticeDetailModal();
-      alert('게시글이 삭제되었습니다.');
-    }
-
-    /* --- KAKAO SHARE --- */
-    function shareToKakao(title, category, desc, address) {
-      if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
-        alert('카카오 SDK 키 설정이 필요합니다.');
-        return;
-      }
-
-      Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: `[제주 맛집] ${title}`,
-          description: `[${category}] ${desc || '제주 추천 맛집입니다.'}\n📍 주소: ${address}`,
-          imageUrl: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=600&q=80',
-          link: { mobileWebUrl: window.location.href, webUrl: window.location.href },
-        },
-        buttons: [{ title: '맛집 위치 및 정보 보기', link: { mobileWebUrl: window.location.href, webUrl: window.location.href } }]
-      });
-    }
-
-    /* --- INITIALIZATION --- */
     window.addEventListener('DOMContentLoaded', () => {
-      renderPensionInfo();
-      renderNoticeList();
-      updateAdminUI();
-
       if (typeof kakao !== 'undefined' && kakao.maps) {
         kakao.maps.load(initKakaoMap);
-      } else {
-        renderFilteredView(true);
-      }
-    });
-
-    window.addEventListener('click', (e) => {
-      if (e.target.classList.contains('modal-overlay')) {
-        closeModal();
-        closePensionModal();
-        closeNoticeModal();
-        closeNoticeDetailModal();
-        closeAdminLoginModal();
-        closePensionEditModal();
       }
     });
   </script>
