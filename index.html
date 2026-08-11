@@ -108,7 +108,7 @@
     .delete-btn { background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: none; }
     .delete-btn:hover { background: #ff4d4f; color: #fff; }
 
-    /* 관리자 전용 등록 버튼 요소 제어 */
+    /* 관리자 전용 요소 제어 */
     .admin-only-btn { display: none; }
 
     /* 모달 공통 스타일 */
@@ -139,9 +139,6 @@
     .add-img-field-btn { width: 100%; background: #f0f0f0; border: 1px dashed #bbb; color: #444; padding: 0.6rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
     .add-img-field-btn:hover { background: #e5e5e5; }
 
-    .category-edit-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
-    .category-edit-row input { flex: 1; }
-
     .gallery-preview-box {
       width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 6px; margin-top: 0.4rem; overflow: hidden; background: #fafafa; display: flex; align-items: center; justify-content: center;
     }
@@ -152,7 +149,6 @@
     .btn-submit { padding: 0.7rem 1.2rem; background: #ff6b35; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-submit:hover { background: #e55a2b; }
 
-    /* 푸터 */
     footer { background: #333; color: #ccc; text-align: center; padding: 2rem 1rem; margin-top: 4rem; font-size: 0.9rem; }
 
     @media (max-width: 768px) {
@@ -181,7 +177,7 @@
     </div>
   </header>
 
-  <!-- 2. 히어로 섹션 (검색창 제외 메인 배너) -->
+  <!-- 2. 히어로 섹션 -->
   <section class="hero" id="heroBanner">
     <h1 id="heroTitle">제주 바다 앞 숙소 & 사장님 추천 맛집</h1>
     <p id="heroSub">스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.</p>
@@ -273,7 +269,7 @@
   <div id="pensionEditModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>⚙️ 펜션 정보/사진 및 카테고리 설정</h2>
+        <h2>⚙️ 펜션 정보 및 사진 설정</h2>
         <button class="close-btn" onclick="closePensionEditModal()">&times;</button>
       </div>
       <form onsubmit="handlePensionEditSubmit(event)">
@@ -297,12 +293,6 @@
           <label>메인 서브 설명 문구</label>
           <input type="text" id="editHeroSub" required>
         </div>
-
-        <div class="form-sub-header">
-          <div class="form-sub-title">🏷️ 맛집 카테고리 관리</div>
-        </div>
-        <div id="editCategoryContainer"></div>
-        <button type="button" class="add-img-field-btn" onclick="addCategoryEditRow()">+ 카테고리 추가하기</button>
 
         <div class="form-sub-header">
           <div class="form-sub-title">🏡 펜션 기본 정보</div>
@@ -467,6 +457,8 @@
 
     let isAdmin = false;
 
+    /* 📌 [방법 B 적용] 소스코드에 영구 고정된 카테고리 목록 */
+    /* 원하시는 카테고리가 있으시면 아래 배열에 직접 추가하시면 됩니다. */
     const DEFAULT_CATEGORIES = [
       { name: '흑돼지', icon: '🐷' },
       { name: '해산물/회', icon: '🐟' },
@@ -483,7 +475,6 @@
       heroBg: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80",
       heroTitle: "제주 바다 앞 숙소 & 사장님 추천 맛집",
       heroSub: "스페이스농농 투숙객을 위해 검증된 제주 진짜 맛집을 지도에서 확인해 보세요.",
-      categories: DEFAULT_CATEGORIES,
       gallery: [
         { url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80", cap: "넓은 잔디밭과 오션뷰 전경" },
         { url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=500&q=80", cap: "아늑한 101호 객실" },
@@ -583,11 +574,10 @@
       reader.readAsDataURL(file);
     }
 
-    /* --- PENSION INFO & CATEGORY MANAGEMENT --- */
+    /* --- PENSION INFO MANAGEMENT --- */
     function getPensionInfo() {
       const saved = localStorage.getItem(PENSION_INFO_KEY);
       const data = saved ? JSON.parse(saved) : DEFAULT_PENSION;
-      if (!data.categories) data.categories = DEFAULT_CATEGORIES;
       return data;
     }
 
@@ -607,8 +597,8 @@
       if (info.heroTitle) document.getElementById('heroTitle').innerText = info.heroTitle;
       if (info.heroSub) document.getElementById('heroSub').innerText = info.heroSub;
 
-      renderCategoriesUI(info.categories);
-      renderModalCategoryOptions(info.categories);
+      renderCategoriesUI(DEFAULT_CATEGORIES);
+      renderModalCategoryOptions(DEFAULT_CATEGORIES);
 
       const galleryContainer = document.getElementById('pensionGallery');
       galleryContainer.innerHTML = '';
@@ -669,11 +659,6 @@
       document.getElementById('editHeroTitle').value = info.heroTitle || '';
       document.getElementById('editHeroSub').value = info.heroSub || '';
 
-      const editCategoryContainer = document.getElementById('editCategoryContainer');
-      editCategoryContainer.innerHTML = '';
-      const catList = info.categories || DEFAULT_CATEGORIES;
-      catList.forEach(cat => { addCategoryEditRow(cat.icon, cat.name); });
-
       const editGalleryContainer = document.getElementById('editGalleryContainer');
       editGalleryContainer.innerHTML = '';
       const galleryList = info.gallery || [];
@@ -681,23 +666,6 @@
 
       document.getElementById('editAdminPassword').value = '';
       document.getElementById('pensionEditModal').style.display = 'flex';
-    }
-
-    function addCategoryEditRow(icon = '', name = '') {
-      const container = document.getElementById('editCategoryContainer');
-      const row = document.createElement('div');
-      row.className = 'category-edit-row';
-      row.innerHTML = `
-        <input type="text" class="input-cat-icon" value="${icon}" placeholder="아이콘" style="width: 70px;">
-        <input type="text" class="input-cat-name" value="${name}" placeholder="카테고리명" required>
-        <button type="button" class="remove-img-item-btn" onclick="removeCategoryEditRow(this)">&times;</button>
-      `;
-      container.appendChild(row);
-    }
-
-    function removeCategoryEditRow(btn) {
-      const row = btn.closest('.category-edit-row');
-      if (row) row.remove();
     }
 
     function addGalleryImageField(url = '', cap = '') {
@@ -740,15 +708,6 @@
       e.preventDefault();
       const currentInfo = getPensionInfo();
 
-      const iconInputs = document.querySelectorAll('.input-cat-icon');
-      const nameInputs = document.querySelectorAll('.input-cat-name');
-      const newCategories = [];
-      nameInputs.forEach((nameInput, idx) => {
-        const nameVal = nameInput.value.trim();
-        const iconVal = iconInputs[idx] ? iconInputs[idx].value.trim() : '';
-        if (nameVal) newCategories.push({ icon: iconVal, name: nameVal });
-      });
-
       const urlInputs = document.querySelectorAll('.input-gallery-url');
       const capInputs = document.querySelectorAll('.input-gallery-cap');
       const newGallery = [];
@@ -767,7 +726,6 @@
         heroBg: document.getElementById('editHeroBg').value,
         heroTitle: document.getElementById('editHeroTitle').value,
         heroSub: document.getElementById('editHeroSub').value,
-        categories: newCategories,
         gallery: newGallery
       };
 
@@ -790,7 +748,7 @@
         closePensionEditModal();
         alert('펜션 설정 및 이미지 정보가 성공적으로 저장되었습니다.' + passMsg);
       } catch (err) {
-        alert('사진 용량이 너무 커서 저장에 실패했습니다. 더 작게 압축된 이미지 파일을 이용해 주세요.');
+        alert('사진 용량이 너무 커서 저장에 실패했습니다. 이미지 파일의 크기를 줄여서 업로드해 주세요.');
       }
     }
 
